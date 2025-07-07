@@ -11,14 +11,14 @@ exports.register = async (req, res) => {
       return res.status(409).json({ message: "Email already registered" });
     const hash = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hash, role });
-    res
-      .status(201)
-      .json({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      });
+    res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    });
   } catch (err) {
     res
       .status(500)
@@ -38,6 +38,8 @@ exports.login = async (req, res) => {
     });
     res.json({
       token,
+      message: "Login successful",
+      success: true,
       user: {
         id: user.id,
         name: user.name,
