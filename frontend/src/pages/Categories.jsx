@@ -1,0 +1,36 @@
+
+import React from 'react';
+import CategoryList from '../components/categories/CategoryList';
+import CategoryForm from '../components/categories/CategoryForm';
+import { useQuery } from '@tanstack/react-query';
+import { categoryService } from '../services/categories';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+
+const Categories = () => {
+  const { data: categories, isLoading, error } = useQuery({
+    queryKey: ['categories'],
+    queryFn: categoryService.getAll,
+  });
+
+  if (isLoading) return <LoadingSpinner text="Loading categories..." />;
+  if (error) return <div className="text-red-600">Failed to load categories.</div>;
+
+  return (
+      <div className="w-full max-w-2xl mx-auto rounded-3xl bg-white/80 shadow-2xl backdrop-blur-2xl p-10 border border-slate-100">
+        <div className="flex flex-col items-center mb-8">
+          <h2 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600 drop-shadow-lg mb-1">Categories</h2>
+          <p className="text-base text-gray-500">Manage your product categories</p>
+        </div>
+        <div className="space-y-8 w-full">
+          <div className="rounded-2xl bg-white/90 shadow-lg p-6 border border-slate-100 backdrop-blur-md">
+            <CategoryForm onSuccess={() => {}} />
+          </div>
+          <div className="rounded-2xl bg-white/90 shadow-lg p-6 border border-slate-100 backdrop-blur-md">
+            <CategoryList />
+          </div>
+        </div>
+      </div>
+  );
+};
+
+export default Categories;

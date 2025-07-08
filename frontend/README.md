@@ -1,12 +1,29 @@
-# React + Vite
+# Product Expiry Alert Management
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a full-stack application for managing product expiry alerts, featuring:
+- Frontend: React (Vite), Tailwind CSS, React Query, React Hook Form, Recharts/Chart.js, barcode scanning, PDF/Excel export, toast notifications, responsive/mobile-first design
+- Backend: Node.js/Express, Sequelize (MySQL), JWT authentication, role-based access, email notifications, barcode processing, scheduled expiry checks, file upload, logging, validation, and security
 
-Currently, two official plugins are available:
+## Getting Started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Frontend
+1. Navigate to the project root and run:
+   ```sh
+   npm install
+   npm run dev
+   ```
 
-## Expanding the ESLint configuration
+### Backend
+1. Navigate to `backend`:
+   ```sh
+   cd backend
+   npm install
+   npm start
+   ```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Folder Structure
+- `frontend/` - React app source
+- `backend/` - Node.js/Express API source
+
+## Requirements
+See `INSTRUCTIONS.txt` for full feature and implementation details.
