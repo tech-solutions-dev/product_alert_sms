@@ -8,6 +8,7 @@ import Layout from './components/common/Layout';
 // Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
+import AddProductPage from './pages/AddProduct';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Categories from './pages/Categories';
@@ -15,6 +16,7 @@ import Users from './pages/Users';
 import Reports from './pages/Reports';
 import Backups from './pages/Backups';
 import Profile from './pages/Profile';
+import ProductLayout from './components/products/ProductLayout';
 
 function App() {
   const { isAuthenticated, loading } = useAuth();
@@ -22,6 +24,7 @@ function App() {
   if (loading) {
     return <LoadingSpinner />;
   }
+
 
   return (
     <Router>
@@ -47,7 +50,10 @@ function App() {
         >
           <Route index element={<Navigate to="/dashboard" />} />
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="products" element={<Products />} />
+          <Route path="products" element={<ProductLayout />}>
+            <Route index element={<Products />} />
+            <Route path="add" element={<AddProductPage />} />
+          </Route>
           <Route path="categories" element={<Categories />} />
           <Route path="users" element={<Users />} />
           <Route path="reports" element={<Reports />} />

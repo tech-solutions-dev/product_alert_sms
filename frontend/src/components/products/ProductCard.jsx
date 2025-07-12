@@ -33,7 +33,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
     <div className="bg-white rounded shadow p-4 flex flex-col gap-2">
       <div className="flex justify-between items-center">
         <h4 className="font-semibold text-lg">{product.name}</h4>
-        {/* <span className={`px-2 py-1 rounded text-xs font-bold ${statusColors[product.status]}`}>{product.status.replace('_', ' ')}</span> */}
+        <span className={`px-2 py-1 rounded text-xs font-bold ${statusColors[product.status]}`}>{product.status}</span>
       </div>
       <div className="text-sm text-gray-600">Category: {product.Category?.name || 'N/A'}</div>
       <div className="text-sm text-gray-600">Expiry: {formatDate(product.expiryDate)}</div>

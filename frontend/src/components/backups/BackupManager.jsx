@@ -1,28 +1,38 @@
-import React from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react';
 import { API_ENDPOINTS } from '../../utils/constants';
-import axios from 'axios';
+import api from '../../services/api';
 
 const BackupManager = () => {
-  const queryClient = useQueryClient();
-  const { mutate, isLoading, isSuccess, isError } = useMutation({
-    mutationFn: async () => {
-      await axios.post(API_ENDPOINTS.CREATE_BACKUP);
-    },
-    onSuccess: () => queryClient.invalidateQueries(['backups']),
-  });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleCreateBackup = async () => {
+    setLoading(true);
+    setSuccess(false);
+    setError(null);
+    try {
+      await api.post(API_ENDPOINTS.CREATE_BACKUP);
+      setSuccess(true);
+    } catch (err) {
+      console.error(err)
+      setError('Failed to create backup.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex items-center gap-4">
       <button
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        onClick={() => mutate()}
-        disabled={isLoading}
+        onClick={handleCreateBackup}
+        disabled={loading}
       >
-        {isLoading ? 'Creating Backup...' : 'Create New Backup'}
+        {loading ? 'Creating Backup...' : 'Create New Backup'}
       </button>
-      {isSuccess && <span className="text-green-600">Backup created!</span>}
-      {isError && <span className="text-red-600">Failed to create backup.</span>}
+      {success && <span className="text-green-600">Backup created!</span>}
+      {error && <span className="text-red-600">{error}</span>}
     </div>
   );
 };

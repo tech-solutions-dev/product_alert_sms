@@ -1,24 +1,30 @@
 import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { API_ENDPOINTS, REPORT_TYPES } from '../../utils/constants';
 import axios from 'axios';
 
 const ReportGenerator = () => {
-  const queryClient = useQueryClient();
   const [type, setType] = useState(REPORT_TYPES.EXPIRY);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
 
-  const { mutate, isLoading, isSuccess, isError } = useMutation({
-    mutationFn: async () => {
-      await axios.post(API_ENDPOINTS.REPORTS, { type, from, to });
-    },
-    onSuccess: () => queryClient.invalidateQueries(['reports']),
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    mutate();
+    setIsLoading(true);
+    setIsSuccess(false);
+    setIsError(false);
+    try {
+      await axios.post(API_ENDPOINTS.REPORTS, { type, from, to });
+      setIsSuccess(true);
+    } catch (err) {
+      console.error(err)
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

@@ -1,18 +1,33 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import CategoryList from '../components/categories/CategoryList';
 import CategoryForm from '../components/categories/CategoryForm';
-import { useQuery } from '@tanstack/react-query';
-import { categoryService } from '../services/categories';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import axios from 'axios';
 
 const Categories = () => {
-  const { data: categories, isLoading, error } = useQuery({
-    queryKey: ['categories'],
-    queryFn: categoryService.getAll,
-  });
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (isLoading) return <LoadingSpinner text="Loading categories..." />;
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get('/api/categories');
+        setCategories(res.data || []);
+        setError(null);
+      } catch (err) {
+        console.error(err)
+        setError('Failed to load categories.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  if (loading) return <LoadingSpinner text="Loading categories..." />;
   if (error) return <div className="text-red-600">Failed to load categories.</div>;
 
   return (
@@ -26,7 +41,7 @@ const Categories = () => {
             <CategoryForm onSuccess={() => {}} />
           </div>
           <div className="rounded-2xl bg-white/90 shadow-lg p-6 border border-slate-100 backdrop-blur-md">
-            <CategoryList />
+            <CategoryList categories={categories} />
           </div>
         </div>
       </div>

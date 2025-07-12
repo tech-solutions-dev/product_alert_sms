@@ -2,9 +2,8 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { API_ENDPOINTS } from '../../utils/constants';
-import axios from 'axios';
+import api from '../../services/api';
 import toast from 'react-hot-toast';
 
 const schema = yup.object().shape({
@@ -12,28 +11,22 @@ const schema = yup.object().shape({
 });
 
 const CategoryForm = () => {
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = React.useState(false);
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     resolver: yupResolver(schema),
   });
 
-  const mutation = useMutation({
-    mutationFn: async (data) => {
-      return await axios.post(API_ENDPOINTS.CATEGORIES, data);
-    },
-    onSuccess: () => {
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    try {
+      await api.post(API_ENDPOINTS.CATEGORIES, data);
       toast.success('Category added successfully!');
-      queryClient.invalidateQueries(['categories']);
       reset();
-    },
-    onError: (error) => {
-      console.log(error)
+    } catch (error) {
       toast.error(error?.response?.data?.message || 'Failed to add category');
-    },
-  });
-
-  const onSubmit = (data) => {
-    mutation.mutate(data);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,9 +45,9 @@ const CategoryForm = () => {
       <button
         type="submit"
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        disabled={mutation.isLoading || isSubmitting}
+        disabled={isLoading || isSubmitting}
       >
-        {mutation.isLoading || isSubmitting ? 'Adding...' : 'Add Category'}
+        {isLoading || isSubmitting ? 'Adding...' : 'Add Category'}
       </button>
     </form>
   );

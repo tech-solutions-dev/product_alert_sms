@@ -26,7 +26,7 @@ export const API_ENDPOINTS = {
   // Backups
   BACKUPS: '/api/backups',
   CREATE_BACKUP: '/api/backups/create',
-  RESTORE_BACKUP: (id) => `/api/backups/${id}/restore`,
+  RESTORE_BACKUP: (id) => `/api/backups/restore/${id}`,
 
   // Barcode
   BARCODE_SCAN: '/api/barcode/scan',

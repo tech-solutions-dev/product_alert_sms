@@ -1,49 +1,71 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { API_ENDPOINTS } from '../../utils/constants';
-import axios from 'axios';
+import api from '../../services/api';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 const CategoryList = () => {
-  const queryClient = useQueryClient();
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState('');
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const res = await axios.get(API_ENDPOINTS.CATEGORIES);
-      return res.data;
-    },
-  });
+  const [updatingId, setUpdatingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id) => {
-      await axios.delete(API_ENDPOINTS.CATEGORY_BY_ID(id));
-    },
-    onSuccess: () => queryClient.invalidateQueries(['categories']),
-  });
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get(API_ENDPOINTS.CATEGORIES);
+        setCategories(res.data || []);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load categories.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, name }) => {
-      await axios.put(API_ENDPOINTS.CATEGORY_BY_ID(id), { name });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['categories']);
+  const handleDelete = async (id) => {
+    if (window.confirm('Delete this category?')) {
+      setDeletingId(id);
+      try {
+        await api.delete(API_ENDPOINTS.CATEGORY_BY_ID(id));
+        setCategories(prev => prev.filter(cat => cat.id !== id));
+      } catch (err) {
+        setError('Failed to delete category.');
+      } finally {
+        setDeletingId(null);
+      }
+    }
+  };
+
+  const handleUpdate = async (id, name) => {
+    setUpdatingId(id);
+    try {
+      await api.put(API_ENDPOINTS.CATEGORY_BY_ID(id), { name });
+      setCategories(prev => prev.map(cat => cat.id === id ? { ...cat, name } : cat));
       setEditingId(null);
-    },
-  });
+    } catch (err) {
+      setError('Failed to update category.');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
-  if (isLoading) return <LoadingSpinner text="Loading categories..." />;
-  if (error) return <div className="text-red-600">Failed to load categories.</div>;
+  if (loading) return <LoadingSpinner text="Loading categories..." />;
+  if (error) return <div className="text-red-600">{error}</div>;
 
   return (
     <>
       <h3 className="text-lg font-semibold mb-2">Category List</h3>
       <ul>
-        {data?.length === 0 && (
+        {categories.length === 0 && (
           <li className="text-gray-500">No categories found.</li>
         )}
-        {data?.map((cat) => (
+        {categories.map((cat) => (
           <li key={cat.id} className="flex items-center gap-2 py-2 border-b last:border-b-0">
             {editingId === cat.id ? (
               <>
@@ -54,8 +76,9 @@ const CategoryList = () => {
                 />
                 <button
                   className="bg-green-500 text-white px-2 py-1 rounded"
-                  onClick={() => updateMutation.mutate({ id: cat.id, name: editValue })}
-                >Save</button>
+                  onClick={() => handleUpdate(cat.id, editValue)}
+                  disabled={updatingId === cat.id}
+                >{updatingId === cat.id ? 'Saving...' : 'Save'}</button>
                 <button
                   className="bg-gray-300 px-2 py-1 rounded"
                   onClick={() => setEditingId(null)}
@@ -70,8 +93,9 @@ const CategoryList = () => {
                 >Edit</button>
                 <button
                   className="bg-red-500 text-white px-2 py-1 rounded"
-                  onClick={() => deleteMutation.mutate(cat.id)}
-                >Delete</button>
+                  onClick={() => handleDelete(cat.id)}
+                  disabled={deletingId === cat.id}
+                >{deletingId === cat.id ? 'Deleting...' : 'Delete'}</button>
               </>
             )}
           </li>

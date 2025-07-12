@@ -27,9 +27,9 @@ const ExpiryChart = ({ data = [] }) => {
       {
         label: 'Products',
         data: [
-          data.fresh || 0,
-          data.expiringSoon || 0,
-          data.expired || 0
+          data.Fresh || data.fresh || 0,
+          data['Expiring Soon'] || data.expiringSoon || 0,
+          data.Expired || data.expired || 0
         ],
         backgroundColor: [
           'rgba(34, 197, 94, 0.8)',

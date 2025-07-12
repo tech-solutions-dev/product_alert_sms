@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-// Placeholder: In production, integrate a real barcode scanner library (e.g. quaggaJS, zxing, etc.)
 const BarcodeScanner = ({ onScan }) => {
   const [barcode, setBarcode] = useState('');
 

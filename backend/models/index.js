@@ -7,8 +7,8 @@ const Backup = require('./Backup');
 const Logging = require('./Logging');
 
 // Associations
-User.belongsToMany(Category, { through: UserCategory, foreignKey: 'userId' });
-Category.belongsToMany(User, { through: UserCategory, foreignKey: 'categoryId' });
+User.belongsToMany(Category, { through: UserCategory, foreignKey: 'userId', as: 'categories' });
+Category.belongsToMany(User, { through: UserCategory, foreignKey: 'categoryId', as: 'users' });
 Category.hasMany(Product, { foreignKey: 'categoryId' });
 Product.belongsTo(Category, { foreignKey: 'categoryId' });
 

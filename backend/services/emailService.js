@@ -4,7 +4,7 @@ exports.sendExpiryAlert = async (product) => {
   // TODO: Fetch user emails associated with the product/category
   const mailOptions = {
     from: process.env.EMAIL_USER,
-    to: 'user@example.com', // We should fetch this dynamically based on the product/category
+    to: 'user@example.com', // Replace with actual user email(s)
     subject: `Product Expiry Alert: ${product.name}`,
     text: `The product '${product.name}' is expiring on ${product.expiryDate}. Please take action.`
   };

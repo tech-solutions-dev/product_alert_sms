@@ -29,7 +29,7 @@ exports.createBackup = async (req, res) => {
       if (error) {
         return res.status(500).json({ message: 'Backup failed', error: stderr || error.message });
       }
-      const backup = await Backup.create({ filePath });
+      const backup = await Backup.create({ filePath, downloadUrl: fileName });
       res.status(201).json(backup);
     });
   } catch (err) {

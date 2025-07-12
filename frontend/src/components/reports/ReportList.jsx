@@ -1,19 +1,30 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { API_ENDPOINTS } from '../../utils/constants';
 import axios from 'axios';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 const ReportList = () => {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['reports'],
-    queryFn: async () => {
-      const res = await axios.get(API_ENDPOINTS.REPORTS);
-      return res.data;
-    },
-  });
+  const [data, setData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
 
-  if (isLoading) return <LoadingSpinner text="Loading reports..." />;
+  React.useEffect(() => {
+    const fetchReports = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(API_ENDPOINTS.REPORTS);
+        setData(res.data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load reports.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReports();
+  }, []);
+
+  if (loading) return <LoadingSpinner text="Loading reports..." />;
   if (error) return <div className="text-red-600">Failed to load reports.</div>;
 
   return (
