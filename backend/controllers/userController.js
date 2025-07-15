@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { User, Category } = require('../models');
+const { UniqueConstraintError } = require('sequelize');
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -17,6 +18,10 @@ exports.getAllUsers = async (req, res) => {
 exports.createUser = async (req, res) => {
   try {
     const { name, email, password, role, categoryIds } = req.body;
+    // Input validation
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
     const hash = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hash, role });
     if (Array.isArray(categoryIds) && categoryIds.length > 0) {
@@ -28,6 +33,10 @@ exports.createUser = async (req, res) => {
     });
     res.status(201).json(userWithCategories);
   } catch (err) {
+    console.error('Error creating user:', err);
+    if (err instanceof UniqueConstraintError) {
+      return res.status(400).json({ message: 'Email already exists' });
+    }
     res.status(500).json({ message: 'Failed to create user', error: err.message });
   }
 };

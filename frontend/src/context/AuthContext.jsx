@@ -56,26 +56,57 @@ const initialState = {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+  // Initialize from localStorage if available
+  const storedToken = localStorage.getItem('token');
+  const storedUser = localStorage.getItem('user');
+  const [state, dispatch] = useReducer(authReducer, {
+    ...initialState,
+    token: storedToken || null,
+    user: storedUser && storedUser !== "undefined" ? JSON.parse(storedUser) : null,
+    isAuthenticated: !!storedToken && !!storedUser,
+    loading: true
+  });
 
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem('token');
-      if (token) {
+      const user = localStorage.getItem('user');
+      if (token && user && user !== 'undefined') {
+        // Set state immediately from localStorage
+        dispatch({
+          type: 'LOGIN_SUCCESS',
+          payload: {
+            user: JSON.parse(user),
+            token
+          }
+        });
+        // Revalidate profile in background
         try {
           const response = await authService.getProfile();
-          dispatch({
-            type: 'LOGIN_SUCCESS',
-            payload: {
-              user: response.data.user,
-              token
-            }
-          });
+          const freshUser = response.data.user;
+          if (freshUser) {
+            localStorage.setItem('user', JSON.stringify(freshUser));
+            dispatch({
+              type: 'LOGIN_SUCCESS',
+              payload: {
+                user: freshUser,
+                token
+              }
+            });
+          }
         } catch (error) {
-          localStorage.removeItem('token');
-          dispatch({ type: 'LOGOUT' });
+          // Only log out if error is 401 Unauthorized (invalid token)
+          if (error.response && error.response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            dispatch({ type: 'LOGOUT' });
+          } else {
+            // For other errors (e.g., network), do not log out
+            dispatch({ type: 'SET_LOADING', payload: false });
+          }
         }
       } else {
+        localStorage.removeItem('user'); // Ensure no undefined/null user is left
         dispatch({ type: 'SET_LOADING', payload: false });
       }
     };
@@ -88,15 +119,19 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authService.login(email, password);
       const { user, token } = response.data;
-      
       localStorage.setItem('token', token);
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('user');
+      }
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: { user, token }
       });
-      
       return { success: true };
     } catch (error) {
+      localStorage.removeItem('user');
       const errorMessage = error.response?.data?.error || 'Login failed';
       dispatch({
         type: 'LOGIN_FAILURE',
@@ -111,15 +146,19 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authService.register(userData);
       const { user, token } = response.data;
-      
       localStorage.setItem('token', token);
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('user');
+      }
       dispatch({
         type: 'LOGIN_SUCCESS',
         payload: { user, token }
       });
-      
       return { success: true };
     } catch (error) {
+      localStorage.removeItem('user');
       const errorMessage = error.response?.data?.error || 'Registration failed';
       dispatch({
         type: 'LOGIN_FAILURE',
@@ -131,11 +170,16 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     dispatch({ type: 'LOGOUT' });
   };
 
   const updateUser = (userData) => {
-    dispatch({ type: 'UPDATE_USER', payload: userData });
+    if (state.user) {
+      const updatedUser = { ...state.user, ...userData };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      dispatch({ type: 'UPDATE_USER', payload: userData });
+    }
   };
 
   const value = {
