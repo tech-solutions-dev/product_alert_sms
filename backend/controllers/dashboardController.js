@@ -1,5 +1,6 @@
-const { Product, Category } = require('../models');
-const { Op } = require('sequelize');
+const { getProductStatus } = require("../config/utils");
+const { Product, Category } = require("../models");
+const { Op } = require("sequelize");
 
 exports.getDashboardOverview = async (req, res) => {
   try {
@@ -8,27 +9,37 @@ exports.getDashboardOverview = async (req, res) => {
     soon.setDate(now.getDate() + 30);
 
     const totalProducts = await Product.count();
-    const expiringSoon = await Product.count({ where: { expiryDate: { [Op.between]: [now, soon] } } });
-    const expired = await Product.count({ where: { expiryDate: { [Op.lt]: now } } });
+    //const totalProducts = await Product.findAll();
+    console.log(totalProducts);
+    const expiringSoon = await Product.count({
+      where: { expiryDate: { [Op.between]: [now, soon] } },
+    });
+    const expired = await Product.count({
+      where: { expiryDate: { [Op.lt]: now } },
+    });
     const categories = await Category.findAll();
 
     const recentProducts = await Product.findAll({
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
       limit: 5,
-      include: [{ model: Category, attributes: ['name'] }]
+      include: [{ model: Category, attributes: ["name"] }],
     });
 
-    const freshProducts = await Product.count({ where: { expiryDate: { [Op.gt]: soon } } });
+    const freshProducts = await Product.count({
+      where: { expiryDate: { [Op.gt]: soon } },
+    });
     const expiryStats = {
       expired,
       expiringSoon,
-      fresh: freshProducts
+      fresh: freshProducts,
     };
 
     const totalCategories = await Category.count();
 
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const addedThisMonth = await Product.count({ where: { createdAt: { [Op.gte]: startOfMonth } } });
+    const addedThisMonth = await Product.count({
+      where: { createdAt: { [Op.gte]: startOfMonth } },
+    });
 
     res.json({
       totalProducts,
@@ -39,9 +50,11 @@ exports.getDashboardOverview = async (req, res) => {
       expiryStats,
       totalCategories,
       addedThisMonth,
-      freshProducts
+      freshProducts,
     });
   } catch (err) {
-    res.status(500).json({ message: 'Failed to fetch dashboard data', error: err.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch dashboard data", error: err.message });
   }
 };

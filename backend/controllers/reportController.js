@@ -13,27 +13,53 @@ exports.getAllReports = async (req, res) => {
 exports.generateReport = async (req, res) => {
   try {
     const { type } = req.body;
-    let periodEnd = new Date();
-    let periodStart = new Date();
-    if (type === 'monthly') {
-      periodEnd.setMonth(periodEnd.getMonth() + 1);
-    } else if (type === 'weekly') {
-      periodEnd.setDate(periodEnd.getDate() + 7);
-    } else {
-      return res.status(400).json({ message: 'Invalid report type' });
+    console.log(req.body);
+    const fromDate = req.body.from ? new Date(req.body.from) : null;
+    const toDate = req.body.to ? new Date(req.body.to) : null;
+    console.log(
+      `Generating report of type: ${type} from ${fromDate} to ${toDate}`
+    );
+
+    if (!type) {
+      return res.status(400).json({ message: "Report type is required" });
     }
-    const now = new Date();
-    const expired = await Product.findAll({
-      where: { expiryDate: { [Op.lt]: now } },
-      order: [['expiryDate', 'DESC']]
-    });
-    const expiring = await Product.findAll({
-      where: { expiryDate: { [Op.between]: [now, periodEnd] } },
-      order: [['expiryDate', 'ASC']]
-    });
-    const report = await Report.create({ type, data: { expired, expiring }, generatedAt: now });
-    res.status(201).json(report);
+    let reports;
+    if (type === "expiring") {
+      console.log("Generating expiring report");
+      reports = await Product.findAll({
+        where: {
+          expiryDate: {
+            [Op.between]: [fromDate, toDate],
+          },
+        },
+      });
+    } else if (type === "expired") {
+      console.log("Generating expired report");
+      reports = await Product.findAll({
+        where: {
+          expiryDate: {
+            [Op.lt]: new Date(),
+            [Op.between]: [fromDate, toDate],
+          },
+        },
+      });
+    } else if (type === "fresh") {
+      console.log("Generating fresh report");
+      reports = await Product.findAll({
+        where: {
+          expiryDate: {
+            [Op.gt]: new Date(),
+            [Op.between]: [fromDate, toDate],
+          },
+        },
+      });
+    } else {
+      return res.status(400).json({ message: "Invalid report type" });
+    }
+    console.log({ data: reports, count: reports.length });
+    return res.json({data: reports,count: reports.length});
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Failed to generate report', error: err.message });
   }
 };

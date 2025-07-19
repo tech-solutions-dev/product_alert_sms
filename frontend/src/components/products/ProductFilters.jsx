@@ -15,7 +15,7 @@ const ProductFilters = ({ filters, setFilters, categories = [], onRefresh }) => 
           <Filter className="w-5 h-5 text-blue-600" />
           <h3 className="font-medium text-gray-800">Filter Products</h3>
         </div>
-        <button 
+        <button
           onClick={handleReset}
           className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
         >
@@ -23,7 +23,7 @@ const ProductFilters = ({ filters, setFilters, categories = [], onRefresh }) => 
           Reset
         </button>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <div className="relative">
@@ -31,35 +31,43 @@ const ProductFilters = ({ filters, setFilters, categories = [], onRefresh }) => 
             <input
               type="text"
               placeholder="Search products..."
-              value={filters.name || ''}
-              onChange={e => setFilters(f => ({ ...f, name: e.target.value }))}
+              value={filters.name || ""}
+              onChange={(e) =>
+                setFilters((f) => ({ ...f, name: e.target.value }))
+              }
               className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
-        
+
         <div>
           <select
-            value={filters.categoryId || ''}
-            onChange={e => setFilters(f => ({ ...f, categoryId: e.target.value }))}
+            value={filters.categoryId || ""}
+            onChange={(e) =>
+              setFilters((f) => ({ ...f, categoryId: e.target.value }))
+            }
             className="w-full py-2 px-4 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Categories</option>
-            {categories.map(cat => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
             ))}
           </select>
         </div>
-        
+
         <div>
           <select
-            value={filters.status || ''}
-            onChange={e => setFilters(f => ({ ...f, status: e.target.value }))}
+            value={filters.status || ""}
+            onChange={(e) =>
+              setFilters((f) => ({ ...f, status: e.target.value }))
+            }
             className="w-full py-2 px-4 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Statuses</option>
             <option value={PRODUCT_STATUS.FRESH}>Fresh</option>
-            <option value={PRODUCT_STATUS.EXPIRING_SOON}>Expiring Soon</option>
+            <option value={PRODUCT_STATUS.EXPIRING}>Expiring Soon</option>
             <option value={PRODUCT_STATUS.EXPIRED}>Expired</option>
           </select>
         </div>

@@ -1,57 +1,65 @@
 export const API_ENDPOINTS = {
   // Auth
-  LOGIN: '/api/auth/login',
-  REGISTER: '/api/auth/register',
-  PROFILE: '/api/auth/profile',
+  LOGIN: "/api/auth/login",
+  REGISTER: "/api/auth/register",
+  PROFILE: "/api/auth/profile",
 
   // Users
-  USERS: '/api/users',
+  USERS: "/api/users",
   USER_BY_ID: (id) => `/api/users/${id}`,
 
   // Categories
-  CATEGORIES: '/api/categories',
+  CATEGORIES: "/api/categories",
   CATEGORY_BY_ID: (id) => `/api/categories/${id}`,
 
   // Products
-  PRODUCTS: '/api/products',
+  PRODUCTS: "/api/products",
   PRODUCT_BY_ID: (id) => `/api/products/${id}`,
 
   // Dashboard
-  DASHBOARD: '/api/dashboard',
+  DASHBOARD: "/api/dashboard",
 
   // Reports
-  REPORTS: '/api/reports',
+  REPORTS: "/api/reports",
+  GENERATE_REPORT: "/api/reports/generate",
+  REPORTS_BY_TYPE: (type) => `/api/reports?type=${type}`,
   REPORT_BY_ID: (id) => `/api/reports/${id}`,
 
   // Backups
-  BACKUPS: '/api/backups',
-  CREATE_BACKUP: '/api/backups/create',
+  BACKUPS: "/api/backups",
+  CREATE_BACKUP: "/api/backups/create",
   RESTORE_BACKUP: (id) => `/api/backups/restore/${id}`,
 
   // Barcode
-  BARCODE_SCAN: '/api/barcode/scan',
+  BARCODE_SCAN: "/api/barcode/scan",
 
   // Uploads
-  UPLOADS: '/api/uploads',
+  UPLOADS: "/api/uploads",
 };
 
 export const PRODUCT_STATUS = {
-  FRESH: 'Fresh',
-  EXPIRING_SOON: 'Expiring Soon',
-  EXPIRED: 'Expired',
+  FRESH: "Fresh",
+  EXPIRING: "Expiring",
+  EXPIRED: "Expired",
 };
 
 export const USER_ROLES = {
-  ADMIN: 'admin',
-  USER: 'user',
-  MANAGER: 'manager',
+  ADMIN: "admin",
+  USER: "user",
+  MANAGER: "manager",
 };
 
+// export const REPORT_TYPES = {
+//   EXPIRY: 'expiry',
+//   INVENTORY: 'inventory',
+//   USAGE: 'usage',
+//   CATEGORY: 'category',
+// };
+
 export const REPORT_TYPES = {
-  EXPIRY: 'expiry',
-  INVENTORY: 'inventory',
-  USAGE: 'usage',
-  CATEGORY: 'category',
+  EXPIRING: "expiring",
+  ExPIRED: "expired",
+  FRESH: "fresh",
 };
 
 export const DATE_FORMATS = {
