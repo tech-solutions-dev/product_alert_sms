@@ -62,6 +62,11 @@ const AddProductPage = () => {
         setScanStatus('initializing');
         setScanError('');
         try {
+            // First check if we have camera permissions
+            const permissionResult = await navigator.mediaDevices.getUserMedia({ video: true });
+            // If we got here, we have permission. Stop the test stream.
+            permissionResult.getTracks().forEach(track => track.stop());
+
             const { Html5Qrcode } = await import('html5-qrcode');
             // Always clean up previous instance
             if (scannerRef.current) {
@@ -102,7 +107,15 @@ const AddProductPage = () => {
             setScanStatus('scanning');
         } catch (err) {
             setScanStatus('error');
-            setScanError(err?.message || 'Failed to initialize camera');
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                setScanError('Camera permission was denied. Please grant camera access in your browser settings and try again.');
+            } else if (err.name === 'NotFoundError') {
+                setScanError('No camera found. Please ensure your device has a working camera.');
+            } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+                setScanError('Could not access your camera. It may be in use by another application.');
+            } else {
+                setScanError(err?.message || 'Failed to initialize camera');
+            }
         }
     };
 

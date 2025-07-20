@@ -23,34 +23,42 @@ const Product = sequelize.define(
     },
     status: {
       type: DataTypes.STRING,
-      get() {
-        return getProductStatus(this.expiryDate);
-      },
+      allowNull: false,
+      defaultValue: 'Fresh',
     },
   },
   {
     timestamps: true,
     hooks: {
-      beforeValidate: (product, options) => {
+      beforeValidate: (product) => {
         if (product.expiryDate) {
           product.status = getProductStatus(product.expiryDate);
         }
       },
-      beforeSave: (product, options) => {
+      beforeSave: (product) => {
+        console.log("Before save hook triggered for product:", product.name);
+        console.log(`Expiry Date: ${product.expiryDate}`);
+        console.log(`Current Status: ${product.status}`);
         product.status = getProductStatus(product.expiryDate);
       },
-      beforeBulkCreate: (products, options) => {
+      beforeBulkCreate: (products) => {
         products.forEach((product) => {
           product.status = getProductStatus(product.expiryDate);
         });
       },
-      beforeUpdate: (product, options) => {
-        // console.log(product);
-        if (product.changed("expiryDate")) {
-          console.log("I am changed");
-          product.status = getProductStatus(product.expiryDate);
-          console.log("Status set to:", product.status);
+      beforeUpdate: (product) => {
+        product.status = getProductStatus(product.expiryDate);
+      },
+      beforeBulkUpdate: (options) => {
+        if (options.attributes && options.attributes.expiryDate) {
+          options.attributes.status = getProductStatus(options.attributes.expiryDate);
         }
+      },
+      afterSave: (product) => {
+        console.log("Product saved, updating status...");
+        console.log(`New status:${product.status} with expiry ${product.expiryDate}`);
+        // product.status = getProductStatus(product.expiryDate);
+        // return product.save();
       },
     },
     // toJSON: {

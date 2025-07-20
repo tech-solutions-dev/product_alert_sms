@@ -1,93 +1,100 @@
-// Helper to determine status
-const { getProductStatus } = require("../config/utils");
+// Product Controller for robust expiry status filtering and management
 const { Product, Category } = require("../models");
 const { Op } = require("sequelize");
+const { getProductStatus } = require("../config/utils");
 
+// GET /api/products?status=Expired|Expiring Soon|Fresh
 exports.getAllProducts = async (req, res) => {
   try {
     const { name, categoryId, status } = req.query;
     const where = {};
     if (name) {
-      where.name = { [require("sequelize").Op.like]: `%${name}%` };
+      where.name = { [Op.like]: `%${name}%` };
     }
     if (categoryId) {
       where.categoryId = categoryId;
     }
+    // Filter by status using expiryDate
     if (status) {
-      console.log("Filtering by status:", status);
       where.status = status;
+    }
+    // Restrict to user's categories if not admin
+    if (req.user.role !== 'admin') {
+      where.categoryId = req.user.categoryIds;
     }
     const products = await Product.findAll({ where, include: Category });
     res.json(products);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch products", error: err.message });
+    res.status(500).json({ message: "Failed to fetch products", error: err.message });
   }
 };
 
+// GET /api/products/:id
 exports.getProductById = async (req, res) => {
   try {
-    const product = await Product.findByPk(req.params.id, {
-      include: Category,
-      raw: false, // Get model instance
-    });
+    const product = await Product.findByPk(req.params.id, { include: Category });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+    // Restrict to user's categories if not admin
+    if (req.user.role !== 'admin' && !req.user.categoryIds.includes(product.categoryId)) {
+      return res.status(403).json({ message: "Forbidden: You do not have access to this product" });
+    }
     res.json(product);
   } catch (err) {
-    res.status(500).json({
-      message: "Failed to fetch product",
-      error: err.message,
-    });
+    res.status(500).json({ message: "Failed to fetch product", error: err.message });
   }
 };
 
+// POST /api/products
 exports.createProduct = async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: Only admins can add products' });
+  }
   try {
-    const { name, barcode, expiryDate, categoryId } = req.body;
-
-    // Status will be calculated automatically by the model's virtual field
+    const { name, barcode, expiryDate, categoryId, description, imageUrl } = req.body;
+    // status is set by model hooks
     const product = await Product.create({
       name,
       barcode,
       expiryDate,
       categoryId,
+      description,
+      imageUrl,
     });
-
     res.status(201).json(product);
   } catch (err) {
-    res.status(500).json({
-      message: "Failed to create product",
-      error: err.message,
-    });
+    res.status(500).json({ message: "Failed to create product", error: err.message });
   }
 };
 
+// PUT /api/products/:id
 exports.updateProduct = async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: Only admins can update products' });
+  }
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-
-    // Status will update automatically when expiryDate changes
+    // Update product fields
     await product.update(req.body);
-
-    res.json({
-      message: "Product updated",
-      product,
-    });
+    // Force status update after expiryDate change
+    if (req.body.expiryDate) {
+      product.status = getProductStatus(product.expiryDate);
+      await product.save();
+    }
+    res.json({ message: "Product updated", product });
   } catch (err) {
-    res.status(500).json({
-      message: "Failed to update product",
-      error: err.message,
-    });
+    res.status(500).json({ message: "Failed to update product", error: err.message });
   }
 };
 
 exports.deleteProduct = async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: Only admins can delete products' });
+  }
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) {

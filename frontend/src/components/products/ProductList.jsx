@@ -6,6 +6,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import ProductModal from './ProductModal';
 import { AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuthContext } from '../../context/AuthContext';
 
 const ProductList = ({ filters = {} }) => {
   const [products, setProducts] = useState([]);
@@ -14,6 +15,8 @@ const ProductList = ({ filters = {} }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const { user } = useAuthContext();
+  console.log("user")
 
   const fetchProducts = async (filters = {}) => {
     try {
@@ -65,6 +68,11 @@ const ProductList = ({ filters = {} }) => {
     }
   };
 
+  // Optionally filter products by user.categoryIds for non-admins
+  const filteredProducts = user && user.role !== 'admin' && user.categoryIds
+    ? products.filter(p => user.categoryIds.includes(p.categoryId))
+    : products;
+
   if (loading) return (
     <div className="flex justify-center py-12">
       <LoadingSpinner text="Loading products..." />
@@ -84,7 +92,7 @@ const ProductList = ({ filters = {} }) => {
       <div className="flex items-center mb-4">
         <h2 className="text-2xl font-bold text-gray-800">Products</h2>
       </div>
-      {products.length === 0 ? (
+      {filteredProducts.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 bg-white/80 rounded-2xl border border-slate-100 text-center">
           <div className="text-gray-400 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,12 +104,12 @@ const ProductList = ({ filters = {} }) => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {products.map(product => (
+          {filteredProducts.map(product => (
             <ProductCard
               key={product.id}
               product={product}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+              onEdit={user && user.role === 'admin' ? handleEdit : undefined}
+              onDelete={user && user.role === 'admin' ? handleDelete : undefined}
               deleting={deletingId === product.id}
             />
           ))}

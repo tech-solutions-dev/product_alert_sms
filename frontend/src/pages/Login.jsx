@@ -34,12 +34,16 @@ const Login = () => {
   });
 
   const onSubmit = async (data) => {
-    const result = await login(data.email, data.password);
-    if (result.success) {
-      toast.success('Login successful!');
-      navigate('/dashboard');
-    } else {
-      toast.error(result.error || 'Login failed');
+    try {
+      const result = await login(data.email, data.password);
+      if (result.success) {
+        toast.success('Login successful!');
+        navigate('/dashboard');
+      } else {
+        toast.error('Invalid Credential');
+      }
+    } catch {
+      toast.error('Invalid Credential');
     }
   };
 

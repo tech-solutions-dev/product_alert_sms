@@ -1,9 +1,51 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { ProductFilterProvider, useProductFilters } from '../../context/ProductFilterContext';
 import { Outlet, useNavigate } from 'react-router';
-import { Plus, Package } from 'lucide-react';
+import { Plus, Package, Download, Loader2 } from 'lucide-react';
+import api from '../../services/api';
+import { useAuthContext } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 
-const ProductLayout = () => {
+const ProductLayoutContent = () => {
   const navigate = useNavigate();
+  const [downloading, setDownloading] = useState(false);
+  const { filters } = useProductFilters();
+  const { user } = useAuthContext();
+
+  const handleDownloadReport = async () => {
+    const toastId = toast.loading('Generating report...', {
+      icon: <Loader2 className="w-4 h-4 animate-spin" />,
+    });
+    
+    try {
+      setDownloading(true);
+      // Use filters from context
+      const response = await api.post('/api/reports/products', filters, {
+        responseType: 'blob', // Expect PDF file
+      });
+
+      // Check if the response is actually a PDF
+      if (response.headers['content-type'] === 'application/pdf') {
+        const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'products-report.pdf');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        toast.success('Report downloaded successfully!', { id: toastId });
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Failed to download report', { id: toastId });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto p-4 sm:p-6">
       <div className="rounded-3xl bg-white/80 shadow-2xl backdrop-blur-2xl p-8 sm:p-10 border border-slate-100">
@@ -19,18 +61,41 @@ const ProductLayout = () => {
               <p className="text-gray-500">Manage your product inventory</p>
             </div>
           </div>
-          <button
-            onClick={() => navigate('/products/add')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-500 text-white rounded-lg hover:from-blue-700 hover:to-indigo-600 shadow-sm"
-          >
-            <Plus className="w-5 h-5" />
-            Add Product
-          </button>
+          <div className="flex gap-2">
+          {user && user.role === 'admin' && (
+            <button
+              onClick={handleDownloadReport}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-green-600 to-blue-500 text-white rounded-lg hover:from-green-700 hover:to-blue-600 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={downloading}
+            >
+              {downloading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Download className="w-5 h-5" />
+              )}
+              Download Report
+            </button>)}
+            {user && user.role === 'admin' && (
+              <button
+                onClick={() => navigate('/products/add')}
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-500 text-white rounded-lg hover:from-blue-700 hover:to-indigo-600 shadow-sm"
+              >
+                <Plus className="w-5 h-5" />
+                Add Product
+              </button>
+            )}
+          </div>
         </div>
         <Outlet />
       </div>
     </div>
   );
 };
+
+const ProductLayout = () => (
+  <ProductFilterProvider>
+    <ProductLayoutContent />
+  </ProductFilterProvider>
+);
 
 export default ProductLayout;

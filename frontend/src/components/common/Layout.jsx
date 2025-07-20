@@ -26,7 +26,7 @@ const Layout = () => {
         <Header toggleSidebar={toggleSidebar} />
         
         {/* Main content area - removed max-w-7xl if you want full-width modals */}
-        <main className="flex-1 px-2 py-6 md:px-10 md:py-12 w-full">
+        <main className="flex-1 px-2 py-6 md:px-10 md:py-12 w-full mt-14">
           <Outlet />
         </main>
         

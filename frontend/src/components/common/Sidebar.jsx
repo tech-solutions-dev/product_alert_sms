@@ -2,19 +2,21 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { NavLink } from 'react-router';
 import { LayoutDashboard, Package, Tags, FileText, Users, Database, LogOut } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
-
-const navItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard size={22} className="text-indigo-600" /> },
-  { name: 'Products', href: '/products', icon: <Package size={22} className="text-blue-600" /> },
-  { name: 'Categories', href: '/categories', icon: <Tags size={22} className="text-purple-600" /> },
-  { name: 'Reports', href: '/reports', icon: <FileText size={22} className="text-green-600" /> },
-  { name: 'Backups', href: '/backups', icon: <Database size={22} className="text-pink-600" /> },
-  { name: 'Users', href: '/users', icon: <Users size={22} className="text-orange-600" /> },
-];
+import { useAuthContext } from '../../context/AuthContext';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuthContext();
+  // Define nav items based on role
+  const navItems = [
+    { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard size={22} className="text-indigo-600" /> },
+    { name: 'Products', href: '/products', icon: <Package size={22} className="text-blue-600" /> },
+    { name: 'Reports', href: '/reports', icon: <FileText size={22} className="text-green-600" /> },
+  ];
+  if (user && user.role === 'admin') {
+    navItems.splice(2, 0, { name: 'Categories', href: '/categories', icon: <Tags size={22} className="text-purple-600" /> });
+    navItems.push({ name: 'Backups', href: '/backups', icon: <Database size={22} className="text-pink-600" /> });
+    navItems.push({ name: 'Users', href: '/users', icon: <Users size={22} className="text-orange-600" /> });
+  }
 
   return (
     <>

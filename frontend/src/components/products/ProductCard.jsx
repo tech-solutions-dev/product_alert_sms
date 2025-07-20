@@ -28,6 +28,7 @@ const statusColors = {
 };
 
 const ProductCard = ({ product, onEdit, onDelete }) => {
+  console.log(!!onEdit, !!onDelete);
 
   return (
     <div className="bg-white rounded shadow p-4 flex flex-col gap-2">
@@ -38,8 +39,12 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
       <div className="text-sm text-gray-600">Category: {product.Category?.name || 'N/A'}</div>
       <div className="text-sm text-gray-600">Expiry: {formatDate(product.expiryDate)}</div>
       <div className="flex gap-2 mt-2">
-        <button className="bg-blue-500 text-white px-3 py-1 rounded" onClick={() => onEdit(product)}>Edit</button>
-        <button className="bg-red-500 text-white px-3 py-1 rounded" onClick={() => onDelete(product)}>Delete</button>
+        {onEdit && (
+          <button className="bg-blue-500 text-white px-3 py-1 rounded" onClick={() => onEdit(product)}>Edit</button>
+        )}
+        {onDelete && (
+          <button className="bg-red-500 text-white px-3 py-1 rounded" onClick={() => onDelete(product)}>Delete</button>
+        )}
       </div>
     </div>
   );

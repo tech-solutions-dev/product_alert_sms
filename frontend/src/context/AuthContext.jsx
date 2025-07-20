@@ -159,7 +159,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       localStorage.removeItem('user');
-      const errorMessage = error.response?.data?.error || 'Registration failed';
+      const errorMessage = error.response?.data?.message || 'Registration failed';
       dispatch({
         type: 'LOGIN_FAILURE',
         payload: errorMessage

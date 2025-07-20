@@ -2,7 +2,12 @@ const { Category } = require('../models');
 
 exports.getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.findAll();
+    let categories;
+    if (req.user.role === 'admin') {
+      categories = await Category.findAll();
+    } else {
+      categories = await Category.findAll({ where: { id: req.user.categoryIds } });
+    }
     res.json(categories);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch categories', error: err.message });
@@ -13,6 +18,10 @@ exports.getCategoryById = async (req, res) => {
   try {
     const category = await Category.findByPk(req.params.id);
     if (!category) return res.status(404).json({ message: 'Category not found' });
+    // Restrict to user's categories if not admin
+    if (req.user.role !== 'admin' && !req.user.categoryIds.includes(category.id)) {
+      return res.status(403).json({ message: 'Forbidden: You do not have access to this category' });
+    }
     res.json(category);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch category', error: err.message });
@@ -20,6 +29,9 @@ exports.getCategoryById = async (req, res) => {
 };
 
 exports.createCategory = async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: Only admins can add categories' });
+  }
   try {
     const { name } = req.body;
     const category = await Category.create({ name });
@@ -30,6 +42,9 @@ exports.createCategory = async (req, res) => {
 };
 
 exports.updateCategory = async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: Only admins can update categories' });
+  }
   try {
     const category = await Category.findByPk(req.params.id);
     if (!category) return res.status(404).json({ message: 'Category not found' });
@@ -41,6 +56,9 @@ exports.updateCategory = async (req, res) => {
 };
 
 exports.deleteCategory = async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: Only admins can delete categories' });
+  }
   try {
     const category = await Category.findByPk(req.params.id);
     if (!category) return res.status(404).json({ message: 'Category not found' });

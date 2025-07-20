@@ -4,6 +4,6 @@ export function getProductStatus(expiryDate) {
   const oneMonthLater = new Date(now);
   oneMonthLater.setMonth(now.getMonth() + 1);
   if (expDate <= now) return 'Expired';
-  if (expDate <= oneMonthLater) return 'Expiring Soon';
+  if (expDate <= oneMonthLater) return 'Expiring';
   return 'Fresh';
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { API_ENDPOINTS } from '../../utils/constants';
 import api from '../../services/api';
 import LoadingSpinner from '../common/LoadingSpinner';
+import { useAuthContext } from '../../context/AuthContext';
 
 const CategoryList = () => {
   const [categories, setCategories] = useState([]);
@@ -11,6 +12,7 @@ const CategoryList = () => {
   const [editValue, setEditValue] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const { user } = useAuthContext();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -55,6 +57,11 @@ const CategoryList = () => {
     }
   };
 
+  // Optionally filter categories by user.categoryIds for non-admins
+  const filteredCategories = user && user.role !== 'admin' && user.categoryIds
+    ? categories.filter(cat => user.categoryIds.includes(cat.id))
+    : categories;
+
   if (loading) return <LoadingSpinner text="Loading categories..." />;
   if (error) return <div className="text-red-600">{error}</div>;
 
@@ -62,10 +69,10 @@ const CategoryList = () => {
     <>
       <h3 className="text-lg font-semibold mb-2">Category List</h3>
       <ul>
-        {categories.length === 0 && (
+        {filteredCategories.length === 0 && (
           <li className="text-gray-500">No categories found.</li>
         )}
-        {categories.map((cat) => (
+        {filteredCategories.map((cat) => (
           <li key={cat.id} className="flex items-center gap-2 py-2 border-b last:border-b-0">
             {editingId === cat.id ? (
               <>
@@ -87,15 +94,19 @@ const CategoryList = () => {
             ) : (
               <>
                 <span className="flex-1">{cat.name}</span>
-                <button
-                  className="bg-blue-500 text-white px-2 py-1 rounded"
-                  onClick={() => { setEditingId(cat.id); setEditValue(cat.name); }}
-                >Edit</button>
-                <button
-                  className="bg-red-500 text-white px-2 py-1 rounded"
-                  onClick={() => handleDelete(cat.id)}
-                  disabled={deletingId === cat.id}
-                >{deletingId === cat.id ? 'Deleting...' : 'Delete'}</button>
+                {user && user.role === 'admin' && (
+                  <>
+                    <button
+                      className="bg-blue-500 text-white px-2 py-1 rounded"
+                      onClick={() => { setEditingId(cat.id); setEditValue(cat.name); }}
+                    >Edit</button>
+                    <button
+                      className="bg-red-500 text-white px-2 py-1 rounded"
+                      onClick={() => handleDelete(cat.id)}
+                      disabled={deletingId === cat.id}
+                    >{deletingId === cat.id ? 'Deleting...' : 'Delete'}</button>
+                  </>
+                )}
               </>
             )}
           </li>

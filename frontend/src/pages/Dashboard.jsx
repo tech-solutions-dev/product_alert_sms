@@ -17,11 +17,13 @@ import DashboardStats from '../components/dashboard/DashboardStats';
 import { Link } from 'react-router';
 import ExpiryChart from '../components/dashboard/ExpiryChart';
 import RecentProducts from '../components/dashboard/RecentProducts';
+import { useAuthContext } from '../context/AuthContext';
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useAuthContext();
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -45,8 +47,13 @@ const Dashboard = () => {
 
   const stats = dashboardData || {};
   const chartData = dashboardData?.expiryStats || {};
-  const recentProducts = dashboardData?.recentProducts || [];
-  const categories = stats.categories || [];
+  // Filter recentProducts and categories for non-admins
+  const recentProducts = user && user.role !== 'admin' && user.categoryIds
+    ? (dashboardData?.recentProducts || []).filter(p => user.categoryIds.includes(p.categoryId))
+    : dashboardData?.recentProducts || [];
+  const categories = user && user.role !== 'admin' && user.categoryIds
+    ? (stats.categories || []).filter(cat => user.categoryIds.includes(cat.id))
+    : stats.categories || [];
   const users = stats.users || [];
 
   return (
@@ -63,7 +70,7 @@ const Dashboard = () => {
           <RecentProducts products={recentProducts} />
         </div>
         {/* Users Section (Admin only) */}
-        {users.length > 0 && (
+        {user && user.role === 'admin' && users.length > 0 && (
           <div className="bg-white rounded-lg shadow p-6 mt-6">
             <h3 className="text-xl font-semibold mb-4 text-orange-700 flex items-center gap-2">
               <Users className="w-5 h-5 text-orange-500" /> Users ({users.length})

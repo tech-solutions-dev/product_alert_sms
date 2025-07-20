@@ -8,25 +8,28 @@ exports.getDashboardOverview = async (req, res) => {
     const soon = new Date();
     soon.setDate(now.getDate() + 30);
 
-    const totalProducts = await Product.count();
-    //const totalProducts = await Product.findAll();
-    console.log(totalProducts);
+    // Build category filter for non-admins
+    const categoryFilter = req.user.role !== 'admin' ? { categoryId: req.user.categoryIds } : {};
+    const categoryIdWhere = req.user.role !== 'admin' ? { id: req.user.categoryIds } : {};
+
+    const totalProducts = await Product.count({ where: categoryFilter });
     const expiringSoon = await Product.count({
-      where: { expiryDate: { [Op.between]: [now, soon] } },
+      where: { ...categoryFilter, expiryDate: { [Op.between]: [now, soon] } },
     });
     const expired = await Product.count({
-      where: { expiryDate: { [Op.lt]: now } },
+      where: { ...categoryFilter, expiryDate: { [Op.lt]: now } },
     });
-    const categories = await Category.findAll();
+    const categories = await Category.findAll({ where: categoryIdWhere });
 
     const recentProducts = await Product.findAll({
+      where: categoryFilter,
       order: [["createdAt", "DESC"]],
       limit: 5,
       include: [{ model: Category, attributes: ["name"] }],
     });
 
     const freshProducts = await Product.count({
-      where: { expiryDate: { [Op.gt]: soon } },
+      where: { ...categoryFilter, expiryDate: { [Op.gt]: soon } },
     });
     const expiryStats = {
       expired,
@@ -34,11 +37,11 @@ exports.getDashboardOverview = async (req, res) => {
       fresh: freshProducts,
     };
 
-    const totalCategories = await Category.count();
+    const totalCategories = await Category.count({ where: categoryIdWhere });
 
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const addedThisMonth = await Product.count({
-      where: { createdAt: { [Op.gte]: startOfMonth } },
+      where: { ...categoryFilter, createdAt: { [Op.gte]: startOfMonth } },
     });
 
     res.json({

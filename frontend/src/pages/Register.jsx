@@ -42,17 +42,29 @@ const Register = () => {
   });
 
   const onSubmit = async (data) => {
-    const result = await registerUser({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    });
-    
-    if (result.success) {
-      toast.success('Registration successful!');
-      navigate('/dashboard');
-    } else {
-      toast.error(result.error || 'Registration failed');
+    try {
+      const result = await registerUser({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
+      
+      if (result.success) {
+        // On success, show message and navigate
+        toast.success('Registration successful!');
+        // Small delay to ensure the success message is seen before redirect
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 100);
+      } else {
+        console.log(result);
+        toast.error(result.error || 'Registration failed. Please try again.');
+      }
+    } catch (error) {
+      console.log(error);
+      // Show specific error message from the response if available
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Registration failed. Please try again.';
+      toast.error(errorMessage);
     }
   };
 

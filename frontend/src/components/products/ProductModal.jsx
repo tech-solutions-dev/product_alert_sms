@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { API_ENDPOINTS } from '../../utils/constants';
 import api from '../../services/api';
-import { Html5Qrcode } from 'html5-qrcode';
-import { X, Camera, Loader2, Scan, AlertCircle, CheckCircle } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 
 const schema = yup.object().shape({
   name: yup.string().min(2, 'Name must be at least 2 characters').required('Name is required'),

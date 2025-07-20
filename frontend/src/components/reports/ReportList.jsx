@@ -2,11 +2,13 @@ import React from 'react';
 import { API_ENDPOINTS } from '../../utils/constants';
 import axios from 'axios';
 import LoadingSpinner from '../common/LoadingSpinner';
+import { useAuthContext } from '../../context/AuthContext';
 
 const ReportList = () => {
   const [data, setData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
+  const { user } = useAuthContext();
 
   React.useEffect(() => {
     const fetchReports = async () => {
@@ -29,6 +31,9 @@ const ReportList = () => {
 
   return (
     <>
+      {user && user.role !== 'admin' && (
+        <div className="mb-2 text-blue-600 text-sm font-medium">You are viewing reports for your assigned categories only.</div>
+      )}
       <h3 className="text-lg font-semibold mb-2">Generated Reports</h3>
       <table className="w-full text-sm">
         <thead>

@@ -31,20 +31,25 @@ api.interceptors.response.use(
   },
   (error) => {
     const message = error.response?.data?.error || 'An error occurred';
+    const isAuthRoute = error.config.url.includes('/auth/login') || error.config.url.includes('/auth/register');
     
-    // Handle specific error cases
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-      toast.error('Session expired. Please login again.');
-    } else if (error.response?.status === 403) {
-      toast.error('Access forbidden. You do not have permission.');
-    } else if (error.response?.status === 404) {
-      toast.error('Resource not found.');
-    } else if (error.response?.status >= 500) {
-      toast.error('Server error. Please try again later.');
-    } else {
-      toast.error(message);
+    // Don't show toast messages for auth routes (login/register)
+    if (!isAuthRoute) {
+      // Handle specific error cases
+      if (error.response?.status === 401) {
+        // Only handle session expiry for non-auth routes
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        toast.error('Session expired. Please login again.');
+      } else if (error.response?.status === 403) {
+        toast.error('Access forbidden. You do not have permission.');
+      } else if (error.response?.status === 404) {
+        toast.error('Resource not found.');
+      } else if (error.response?.status >= 500) {
+        toast.error('Server error. Please try again later.');
+      } else {
+        toast.error(message);
+      }
     }
     
     return Promise.reject(error);

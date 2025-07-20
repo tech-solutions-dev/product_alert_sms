@@ -27,7 +27,7 @@ const Header = ({ toggleSidebar }) => {
   };
 
   return (
-    <header className="flex items-center justify-between px-4 md:px-8 py-4 bg-white/80 shadow-lg border-b border-slate-100 backdrop-blur-2xl mb-6">
+    <header className="flex items-center justify-between px-4 md:px-8 py-4 bg-white/80 shadow-lg border-b border-slate-100 backdrop-blur-2xl mb-6 fixed top-0 left-0 right-0 z-100">
       <button className="md:hidden mr-2" onClick={toggleSidebar}>
         <Menu size={28} className="text-indigo-600" />
       </button>
