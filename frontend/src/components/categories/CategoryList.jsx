@@ -3,6 +3,8 @@ import { API_ENDPOINTS } from '../../utils/constants';
 import api from '../../services/api';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { useAuthContext } from '../../context/AuthContext';
+import ConfirmDialog from '../common/ConfirmDialog';
+import toast from 'react-hot-toast';
 
 const CategoryList = () => {
   const [categories, setCategories] = useState([]);
@@ -12,6 +14,7 @@ const CategoryList = () => {
   const [editValue, setEditValue] = useState('');
   const [updatingId, setUpdatingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, categoryId: null });
   const { user } = useAuthContext();
 
   useEffect(() => {
@@ -22,7 +25,7 @@ const CategoryList = () => {
         setCategories(res.data || []);
         setError(null);
       } catch (err) {
-        setError('Failed to load categories.');
+        setError(err.message || 'Failed to load categories.');
       } finally {
         setLoading(false);
       }
@@ -30,17 +33,27 @@ const CategoryList = () => {
     fetchCategories();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Delete this category?')) {
-      setDeletingId(id);
-      try {
-        await api.delete(API_ENDPOINTS.CATEGORY_BY_ID(id));
-        setCategories(prev => prev.filter(cat => cat.id !== id));
-      } catch (err) {
-        setError('Failed to delete category.');
-      } finally {
-        setDeletingId(null);
-      }
+  const handleDeleteClick = (id) => {
+    setConfirmDialog({
+      open: true,
+      categoryId: id
+    });
+  };
+
+  const handleDelete = async () => {
+    const id = confirmDialog.categoryId;
+    setDeletingId(id);
+    try {
+      await api.delete(API_ENDPOINTS.CATEGORY_BY_ID(id));
+      setCategories(prev => prev.filter(cat => cat.id !== id));
+      setError(null);
+      toast.success('Category deleted successfully');
+    } catch (err) {
+      setError(err.message || 'Failed to delete category.');
+      toast.error(err.message || 'Failed to delete category.');
+    } finally {
+      setDeletingId(null);
+      setConfirmDialog({ open: false, categoryId: null });
     }
   };
 
@@ -50,14 +63,16 @@ const CategoryList = () => {
       await api.put(API_ENDPOINTS.CATEGORY_BY_ID(id), { name });
       setCategories(prev => prev.map(cat => cat.id === id ? { ...cat, name } : cat));
       setEditingId(null);
+      setError(null);
+      toast.success('Category updated successfully');
     } catch (err) {
-      setError('Failed to update category.');
+      setError(err.message || 'Failed to update category.');
+      toast.error(err.message || 'Failed to update category.');
     } finally {
       setUpdatingId(null);
     }
   };
 
-  // Optionally filter categories by user.categoryIds for non-admins
   const filteredCategories = user && user.role !== 'admin' && user.categoryIds
     ? categories.filter(cat => user.categoryIds.includes(cat.id))
     : categories;
@@ -102,7 +117,7 @@ const CategoryList = () => {
                     >Edit</button>
                     <button
                       className="bg-red-500 text-white px-2 py-1 rounded"
-                      onClick={() => handleDelete(cat.id)}
+                      onClick={() => handleDeleteClick(cat.id)}
                       disabled={deletingId === cat.id}
                     >{deletingId === cat.id ? 'Deleting...' : 'Delete'}</button>
                   </>
@@ -112,6 +127,14 @@ const CategoryList = () => {
           </li>
         ))}
       </ul>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        title="Delete Category"
+        message="Are you sure you want to delete this category? All products in this category will also be deleted."
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDialog({ open: false, categoryId: null })}
+      />
     </>
   );
 };

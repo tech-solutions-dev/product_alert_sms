@@ -12,17 +12,14 @@ exports.register = async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hash, role });
     
-    // Generate token just like in login
     const token = jwt.sign({ id: user.id, role: user.role }, jwtSecret, { expiresIn: jwtExpiresIn });
     
-    // Get category IDs if not admin (same as login)
     let categoryIds = [];
     if (user.role !== 'admin') {
       const userCategories = await UserCategory.findAll({ where: { userId: user.id } });
       categoryIds = userCategories.map(uc => uc.categoryId);
     }
     
-    // Return same response structure as login
     res.status(201).json({
       token,
       user: {
@@ -34,7 +31,6 @@ exports.register = async (req, res) => {
       }
     });
   } catch (err) {
-    console.log(err)
     res.status(500).json({ message: 'Registration failed', error: err.message });
   }
 };

@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const Category = require('./Category');
 const { getProductStatus } = require("../config/utils");
 
 const Product = sequelize.define(
@@ -19,7 +18,11 @@ const Product = sequelize.define(
     categoryId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: { model: "Categories", key: "id" },
+      references: { 
+        model: "Categories", 
+        key: "id",
+      },
+      onDelete: 'CASCADE'
     },
     status: {
       type: DataTypes.STRING,
@@ -36,9 +39,6 @@ const Product = sequelize.define(
         }
       },
       beforeSave: (product) => {
-        console.log("Before save hook triggered for product:", product.name);
-        console.log(`Expiry Date: ${product.expiryDate}`);
-        console.log(`Current Status: ${product.status}`);
         product.status = getProductStatus(product.expiryDate);
       },
       beforeBulkCreate: (products) => {
@@ -54,24 +54,8 @@ const Product = sequelize.define(
           options.attributes.status = getProductStatus(options.attributes.expiryDate);
         }
       },
-      afterSave: (product) => {
-        console.log("Product saved, updating status...");
-        console.log(`New status:${product.status} with expiry ${product.expiryDate}`);
-        // product.status = getProductStatus(product.expiryDate);
-        // return product.save();
-      },
     },
-    // toJSON: {
-    //   virtuals: true,
-    //   getters: true,
-    // },
-    // toObject: {
-    //   virtuals: true,
-    //   getters: true,
-    // },
   }
 );
-
-Product.belongsTo(Category, { foreignKey: 'categoryId' });
 
 module.exports = Product;

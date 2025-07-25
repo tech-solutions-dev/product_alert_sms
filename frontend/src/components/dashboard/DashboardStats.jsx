@@ -49,7 +49,6 @@ const DashboardStats = ({ stats = {} }) => {
           <div className="mb-2 z-10">{card.icon}</div>
           <span className={`text-3xl font-extrabold ${card.text} z-10`}>{stats[card.key] ?? 0}</span>
           <span className="text-gray-600 mt-1 text-sm font-medium tracking-wide z-10">{card.label}</span>
-          {/* Decorative blurred blob */}
           <span className="absolute -bottom-6 -right-6 w-20 h-20 rounded-full bg-gradient-to-tr from-blue-300 via-indigo-200 to-purple-200 opacity-20 blur-2xl z-0" />
         </div>
       ))}

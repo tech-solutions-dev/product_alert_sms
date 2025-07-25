@@ -19,12 +19,10 @@ const ProductLayoutContent = () => {
     
     try {
       setDownloading(true);
-      // Use filters from context
       const response = await api.post('/api/reports/products', filters, {
-        responseType: 'blob', // Expect PDF file
+        responseType: 'blob',
       });
 
-      // Check if the response is actually a PDF
       if (response.headers['content-type'] === 'application/pdf') {
         const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
         const link = document.createElement('a');

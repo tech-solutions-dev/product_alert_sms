@@ -47,7 +47,6 @@ const Dashboard = () => {
 
   const stats = dashboardData || {};
   const chartData = dashboardData?.expiryStats || {};
-  // Filter recentProducts and categories for non-admins
   const recentProducts = user && user.role !== 'admin' && user.categoryIds
     ? (dashboardData?.recentProducts || []).filter(p => user.categoryIds.includes(p.categoryId))
     : dashboardData?.recentProducts || [];
@@ -69,7 +68,6 @@ const Dashboard = () => {
           <ExpiryChart data={chartData} />
           <RecentProducts products={recentProducts} />
         </div>
-        {/* Users Section (Admin only) */}
         {user && user.role === 'admin' && users.length > 0 && (
           <div className="bg-white rounded-lg shadow p-6 mt-6">
             <h3 className="text-xl font-semibold mb-4 text-orange-700 flex items-center gap-2">
@@ -86,7 +84,6 @@ const Dashboard = () => {
             </ul>
           </div>
         )}
-        {/* Categories Section */}
         <div className="bg-white rounded-lg shadow p-6 mt-6">
           <h3 className="text-xl font-semibold mb-4 text-purple-700 flex items-center gap-2">
             <Archive className="w-5 h-5 text-purple-500" /> Categories ({categories.length})

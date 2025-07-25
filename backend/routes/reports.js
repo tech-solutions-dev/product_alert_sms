@@ -7,8 +7,6 @@ const { roleCheck } = require('../middleware/roleCheck');
 
 router.get('/', auth, roleCheck(['admin', 'user']), reportController.getAllReports);
 router.post('/generate', auth, roleCheck(['admin', 'user']), reportController.generateReport);
-router.get('/:id', auth, roleCheck(['admin', 'user']), reportController.getReportById);
 
-// Products PDF report
 router.post('/products', auth, roleCheck(['admin', 'user']), reportsController.generateProductsReport);
 module.exports = router;

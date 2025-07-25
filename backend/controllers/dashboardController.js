@@ -8,7 +8,6 @@ exports.getDashboardOverview = async (req, res) => {
     const soon = new Date();
     soon.setDate(now.getDate() + 30);
 
-    // Build category filter for non-admins
     const categoryFilter = req.user.role !== 'admin' ? { categoryId: req.user.categoryIds } : {};
     const categoryIdWhere = req.user.role !== 'admin' ? { id: req.user.categoryIds } : {};
 

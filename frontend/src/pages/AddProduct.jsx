@@ -57,28 +57,20 @@ const AddProductPage = () => {
         }
     };
 
-    // Scanner logic (similar to modal)
     const initScanner = async () => {
         setScanStatus('initializing');
         setScanError('');
         try {
-            // First check if we have camera permissions
-            const permissionResult = await navigator.mediaDevices.getUserMedia({ video: true });
-            // If we got here, we have permission. Stop the test stream.
-            permissionResult.getTracks().forEach(track => track.stop());
-
             const { Html5Qrcode } = await import('html5-qrcode');
-            // Always clean up previous instance
             if (scannerRef.current) {
                 try {
                     await scannerRef.current.stop();
-                } catch { /* ignore error */ }
+                } catch(err) { console.log(err) }
                 try {
                     await scannerRef.current.clear();
-                } catch { /* ignore error */ }
+                } catch(err) { console.log(err) }
                 scannerRef.current = null;
             }
-            // Remove any previous scanner DOM node
             const scannerElem = document.getElementById('barcode-scanner');
             if (scannerElem) {
                 scannerElem.innerHTML = '';
@@ -107,15 +99,7 @@ const AddProductPage = () => {
             setScanStatus('scanning');
         } catch (err) {
             setScanStatus('error');
-            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-                setScanError('Camera permission was denied. Please grant camera access in your browser settings and try again.');
-            } else if (err.name === 'NotFoundError') {
-                setScanError('No camera found. Please ensure your device has a working camera.');
-            } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
-                setScanError('Could not access your camera. It may be in use by another application.');
-            } else {
-                setScanError(err?.message || 'Failed to initialize camera');
-            }
+            setScanError(err?.message || 'Failed to initialize camera');
         }
     };
 
@@ -130,7 +114,6 @@ const AddProductPage = () => {
             } catch { /* ignore error */ }
             scannerRef.current = null;
         }
-        // Remove any previous scanner DOM node
         const scannerElem = document.getElementById('barcode-scanner');
         if (scannerElem) {
             scannerElem.innerHTML = '';

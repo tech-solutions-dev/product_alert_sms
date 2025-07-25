@@ -16,7 +16,6 @@ import { API_ENDPOINTS } from '../utils/constants';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { Helmet } from 'react-helmet-async';
 
-// Local date formatter with time
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
   const d = new Date(dateStr);
@@ -29,7 +28,6 @@ const formatDate = (dateStr) => {
   });
 };
 
-// Calculate days until expiry
 const getDaysUntilExpiry = (expiryDate) => {
   const today = new Date();
   const expiry = new Date(expiryDate);
@@ -38,7 +36,6 @@ const getDaysUntilExpiry = (expiryDate) => {
   return diffDays;
 };
 
-// Status badge component with color coding
 const StatusBadge = ({ status }) => {
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
@@ -60,7 +57,6 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-// Simple Card component
 const Card = ({ title, value, color }) => (
   <div className={`rounded-lg shadow p-4 flex flex-col items-center bg-white border-t-4 ${color || 'border-blue-600'}`}>
     <div className="text-lg font-semibold text-gray-700 mb-1">{title}</div>
@@ -68,7 +64,6 @@ const Card = ({ title, value, color }) => (
   </div>
 );
 
-// Simple Table component
 const Table = ({ columns, data, loading, emptyMessage }) => (
   <div className="overflow-x-auto">
     <table className="min-w-full border rounded shadow">
@@ -193,7 +188,6 @@ const Reports = () => {
         <title>Inventory Reports - Product Expiry Tracker</title>
       </Helmet>
 
-      {/* Header Section with Gradient */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white shadow-lg">
         <div className="flex justify-between items-start">
           <div>
@@ -223,7 +217,6 @@ const Reports = () => {
         </div>
       </div>
 
-      {/* Enhanced Filters Section */}
       <div className="bg-gradient-to-br from-white to-blue-50 rounded-2xl shadow-lg p-6 border border-blue-100">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -303,7 +296,6 @@ const Reports = () => {
         </div>
       </div>
 
-      {/* Loading and Error States */}
       {loading && (
         <div className="flex justify-center items-center py-12 bg-white/80 rounded-2xl border border-gray-100 shadow-lg backdrop-blur-sm">
           <LoadingSpinner text="Analyzing inventory data..." />
@@ -329,7 +321,6 @@ const Reports = () => {
 
       {!loading && !error && (
         <>
-          {/* Warnings & Alerts */}
           {overview.warnings && overview.warnings.length > 0 && (
             <div className="space-y-3">
               {overview.warnings
@@ -375,7 +366,6 @@ const Reports = () => {
             </div>
           )}
 
-          {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200 shadow-lg">
               <div className="flex items-center justify-between mb-4">
@@ -430,9 +420,7 @@ const Reports = () => {
             </div>
           </div>
 
-          {/* Analysis Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Categories Stats */}
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -473,7 +461,6 @@ const Reports = () => {
               )}
             </div>
 
-            {/* Trend Analysis */}
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -505,7 +492,6 @@ const Reports = () => {
             </div>
           </div>
 
-          {/* Enhanced Products Table */}
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">

@@ -56,7 +56,6 @@ const initialState = {
 };
 
 export const AuthProvider = ({ children }) => {
-  // Initialize from localStorage if available
   const storedToken = localStorage.getItem('token');
   const storedUser = localStorage.getItem('user');
   const [state, dispatch] = useReducer(authReducer, {
@@ -95,13 +94,11 @@ export const AuthProvider = ({ children }) => {
             });
           }
         } catch (error) {
-          // Only log out if error is 401 Unauthorized (invalid token)
           if (error.response && error.response.status === 401) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             dispatch({ type: 'LOGOUT' });
           } else {
-            // For other errors (e.g., network), do not log out
             dispatch({ type: 'SET_LOADING', payload: false });
           }
         }

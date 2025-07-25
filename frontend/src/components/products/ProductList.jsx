@@ -16,7 +16,6 @@ const ProductList = ({ filters = {} }) => {
   const [error, setError] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const { user } = useAuthContext();
-  console.log("user")
 
   const fetchProducts = async (filters = {}) => {
     try {
@@ -25,6 +24,7 @@ const ProductList = ({ filters = {} }) => {
       setProducts(res.data || []);
       setError(null);
     } catch (err) {
+      console.error('Failed to fetch products:', err);
       setError('Failed to load products.');
       toast.error('Failed to load products');
     } finally {
@@ -68,7 +68,6 @@ const ProductList = ({ filters = {} }) => {
     }
   };
 
-  // Optionally filter products by user.categoryIds for non-admins
   const filteredProducts = user && user.role !== 'admin' && user.categoryIds
     ? products.filter(p => user.categoryIds.includes(p.categoryId))
     : products;

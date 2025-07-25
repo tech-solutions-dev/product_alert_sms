@@ -18,7 +18,6 @@ exports.getAllUsers = async (req, res) => {
 exports.createUser = async (req, res) => {
   try {
     const { name, email, password, role, categoryIds } = req.body;
-    // Input validation
     if (!name || !email || !password || !role) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -33,7 +32,6 @@ exports.createUser = async (req, res) => {
     });
     res.status(201).json(userWithCategories);
   } catch (err) {
-    console.error('Error creating user:', err);
     if (err instanceof UniqueConstraintError) {
       return res.status(400).json({ message: 'Email already exists' });
     }

@@ -1,7 +1,6 @@
 const PDFDocument = require('pdfkit');
 const { getProductStatus } = require('../config/utils');
 
-// Define icons for different sections
 const ICONS = {
     products: '📦',
     fresh: '✅',
@@ -24,7 +23,6 @@ const ICONS = {
     critical: '🔥'
   };
   
-  // Define darker color scheme
   const COLORS = {
     blue: {
       primary: '#1e40af', // Darker blue
@@ -85,7 +83,6 @@ async function pdfGenerator(res, products, filters) {
         }
       });
     
-      // Set response headers with better filename
       const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
       const filename = `products-report-${reportType}-${timestamp}.pdf`;
       
@@ -94,47 +91,36 @@ async function pdfGenerator(res, products, filters) {
       res.setHeader('Cache-Control', 'no-cache');
       doc.pipe(res);
     
-      // Generate the PDF content
-      const pageWidth = doc.page.width - 100; // Account for margins
+      const pageWidth = doc.page.width - 100;
       
-      // Enhanced header with company branding
       drawEnhancedHeader(doc, pageWidth);
       
-      // Executive summary
       drawExecutiveSummary(doc, products, filters, pageWidth);
       
-      // Key metrics dashboard
       drawKeyMetrics(doc, products, pageWidth);
       
       if (includeCharts !== false) {
-        // Only add page if we have content to show
         if (products.length > 0) {
-          // Advanced analytics charts
           doc.addPage();
           drawAdvancedCharts(doc, products, pageWidth);
           
-          // Risk assessment
           drawRiskAssessment(doc, products, pageWidth);
           
-          // Trend analysis
           drawTrendAnalysis(doc, products, pageWidth);
         }
       }
       
-      // Products table with enhanced formatting
       if (reportType !== 'summary' && products.length > 0) {
         doc.addPage();
         drawEnhancedProductsTable(doc, products, pageWidth, reportType);
       }
       
-      // Recommendations section - only add if we have recommendations
       const recommendations = generateRecommendations(products);
       if (recommendations.length > 0) {
         doc.addPage();
         drawRecommendations(doc, products, pageWidth);
       }
       
-      // Add page numbers and enhanced footer
       addPageNumbers(doc);
       drawEnhancedFooter(doc);
       
@@ -146,7 +132,6 @@ async function pdfGenerator(res, products, filters) {
 function drawEnhancedHeader(doc, pageWidth) {
 doc.save();
 
-// Create a darker gradient background
 const headerHeight = 180;
 const gradientColors = [COLORS.blue.secondary, COLORS.blue.primary, COLORS.blue.light];
 const segmentHeight = headerHeight / gradientColors.length;
@@ -160,12 +145,10 @@ gradientColors.forEach((color, index) => {
   }
 });
 
-// Logo and title section with better spacing
 doc.circle(70, 70, 35)
    .fillColor(COLORS.white.secondary)
    .fill();
 
-// Title with enhanced shadow effect and spacing
 const titleX = 130;
 
 doc.fontSize(38)
@@ -188,7 +171,6 @@ doc.fontSize(32)
    .fillColor('#ffffff')
    .text('ANALYTICS', titleX, 80);
 
-// Enhanced metadata boxes with better spacing - moved up below the title
 const now = new Date();
 const metaBoxes = [
   { label: 'Generated', value: now.toLocaleDateString() },
@@ -196,15 +178,13 @@ const metaBoxes = [
   { label: 'Status', value: 'Active Report' }
 ];
 
-// Calculate center position for metadata boxes
-const totalMetaWidth = pageWidth - 80; // Total width for all boxes
-const metaWidth = totalMetaWidth / 3; // Width per box
-const metaSpacing = 10; // Space between boxes
-const metaY = 132; // Position below ANALYTICS title
-let metaX = 40; // Start from left margin
+const totalMetaWidth = pageWidth - 80;
+const metaWidth = totalMetaWidth / 3;
+const metaSpacing = 10; 
+const metaY = 132; 
+let metaX = 40; 
 
 metaBoxes.forEach((box) => {
-  // Box with darker background
   doc.roundedRect(metaX, metaY, metaWidth - metaSpacing, 35, 4)
      .fillColor(COLORS.blue.secondary)
      .fill()
@@ -212,7 +192,6 @@ metaBoxes.forEach((box) => {
      .lineWidth(0.5)
      .stroke();
   
-  // Labels with proper spacing
   doc.fontSize(10)
      .fillColor('#ffffff')
      .text(box.label, metaX + 10, metaY + 8);
@@ -230,10 +209,8 @@ doc.y = headerHeight + 30;
 }
 
 function drawExecutiveSummary(doc, products, filters, pageWidth) {
-// Section header with modern design
 drawSectionHeader(doc, 'EXECUTIVE SUMMARY', pageWidth);
 
-// Applied filters in a styled box with better contrast
 doc.roundedRect(40, doc.y, pageWidth, 60, 8)
    .fillColor(COLORS.white.primary)
    .fill()
@@ -254,7 +231,6 @@ doc.text(filterSummary, 55, doc.y, { width: pageWidth - 30 });
 
 doc.y += 80;
 
-// Enhanced summary statistics
 const stats = calculateAdvancedStats(products);
 drawEnhancedSummaryBoxes(doc, stats, pageWidth);
 }
@@ -265,7 +241,6 @@ drawSectionHeader(doc, 'KEY PERFORMANCE INDICATORS', pageWidth);
 
 const metrics = calculateKPIs(products);
 
-// Create a dashboard-style layout
 const boxWidth = (pageWidth - 40) / 3;
 const boxHeight = 80;
 const startY = doc.y + 10;
@@ -274,26 +249,21 @@ metrics.forEach((metric, index) => {
   const x = 40 + (index % 3) * (boxWidth + 20);
   const y = startY + Math.floor(index / 3) * (boxHeight + 20);
   
-  // Gradient background for each metric box
   drawGradientBox(doc, x, y, boxWidth, boxHeight, metric.color, metric.secondaryColor);
   
-  // Icon
   doc.fontSize(24)
      .fillColor('#ffffff')
      .text(metric.icon, x + 15, y + 15);
   
-  // Value with emphasis
   doc.fontSize(24)
      .font('Helvetica-Bold')
      .fillColor('#ffffff')
      .text(metric.value, x + 55, y + 12);
   
-  // Label
   doc.fontSize(11)
      .font('Helvetica')
      .text(metric.label, x + 15, y + 45);
   
-  // Trend indicator
   if (metric.trend) {
     doc.fontSize(10)
        .fillColor(metric.trend.direction === 'up' ? '#10b981' : '#ef4444')
@@ -305,14 +275,11 @@ doc.y = startY + Math.ceil(metrics.length / 3) * (boxHeight + 20) + 20;
 }
 
 function drawAdvancedCharts(doc, products, pageWidth) {
-// Status distribution with enhanced pie chart
 drawEnhancedStatusChart(doc, products, pageWidth);
 
-// Category analysis with horizontal bar chart
 doc.y += 200;
 drawEnhancedCategoryChart(doc, products, pageWidth);
 
-// Only add new page for timeline if we have enough space
 if (doc.y > doc.page.height - 300) {
   doc.addPage();
 }
@@ -325,24 +292,20 @@ drawSectionHeader(doc, 'RISK ASSESSMENT', pageWidth);
 const risks = assessRisks(products);
 const riskLevel = calculateOverallRisk(risks);
 
-// Draw main risk indicator
 const indicatorWidth = pageWidth - 80;
 const indicatorHeight = 50;
 const x = 40;
 let y = doc.y + 20;
 
-// Check if we need a new page
 if (y + indicatorHeight + (risks.length * 80) + 150 > doc.page.height - 100) {
   doc.addPage();
   y = 50;
 }
 
-// Main risk box with dark background
 doc.roundedRect(x, y, indicatorWidth, indicatorHeight, 8)
    .fillColor(COLORS.gray.secondary)
    .fill();
 
-// Risk level fill
 const fillWidth = (riskLevel.score / 100) * (indicatorWidth - 4);
 const riskColor = riskLevel.score > 70 ? COLORS.red.primary : 
                  riskLevel.score > 40 ? COLORS.orange.primary : 
@@ -352,27 +315,22 @@ doc.roundedRect(x + 2, y + 2, fillWidth, indicatorHeight - 4, 6)
    .fillColor(riskColor)
    .fill();
 
-// Risk score display
 doc.fontSize(24)
    .font('Helvetica-Bold')
    .fillColor('#ffffff')
    .text(`${riskLevel.score}%`, x + 20, y + 14);
 
-// Risk level text
 doc.fontSize(16)
    .font('Helvetica-Bold')
    .fillColor('#ffffff')
    .text(riskLevel.level.toUpperCase() + ' RISK LEVEL', 
          x + 90, y + 16);
 
-// Draw detailed risk items
 let currentY = y + indicatorHeight + 30;
 
-// Risk items container
 const riskItemsWidth = pageWidth - 80;
 const containerHeight = risks.length * 80 + 20;
 
-// Check if we need a new page for risk items
 if (currentY + containerHeight > doc.page.height - 100) {
   doc.addPage();
   currentY = 50;
@@ -392,7 +350,6 @@ risks.forEach((risk, index) => {
   const itemX = x + 15;
   const itemWidth = riskItemsWidth - 30;
   
-  // Risk item background
   const bgColor = risk.level === 'high' ? COLORS.red.primary :
                  risk.level === 'medium' ? COLORS.orange.primary :
                  COLORS.green.primary;
@@ -401,7 +358,6 @@ risks.forEach((risk, index) => {
      .fillColor(bgColor)
      .fill();
   
-  // Risk level indicator
   doc.roundedRect(itemX + 10, itemY + 10, 80, 24, 4)
      .fillColor(COLORS.gray.secondary)
      .fill();
@@ -413,7 +369,6 @@ risks.forEach((risk, index) => {
            itemX + 20, 
            itemY + 16);
   
-  // Risk title
   doc.fontSize(14)
      .font('Helvetica-Bold')
      .fillColor('#ffffff')
@@ -422,7 +377,6 @@ risks.forEach((risk, index) => {
            itemY + 12,
            { width: itemWidth - 120 });
   
-  // Risk description
   doc.fontSize(11)
      .font('Helvetica')
      .fillColor('#ffffff')
@@ -432,17 +386,14 @@ risks.forEach((risk, index) => {
            { width: itemWidth - 30 });
 });
 
-// Add recommendations if risk level is high
 if (riskLevel.score > 40) {
   currentY += containerHeight + 20;
   
-  // Check if we need a new page for recommendations
   if (currentY + 100 > doc.page.height - 100) {
     doc.addPage();
     currentY = 50;
   }
   
-  // Recommendations container
   doc.roundedRect(x, currentY, riskItemsWidth, 80, 8)
      .fillColor(COLORS.blue.secondary)
      .fill();
@@ -466,12 +417,11 @@ if (riskLevel.score > 40) {
   currentY += 100;
 }
 
-// Update the document's Y position
 doc.y = currentY + 20;
 }
 
 function drawTrendAnalysis(doc, products, pageWidth) {
-drawSectionHeader(doc, `${ICONS.trend} TREND ANALYSIS`, pageWidth);
+drawSectionHeader(doc, 'TREND ANALYSIS', pageWidth);
 
 const monthlyData = calculateMonthlyExpiryTrend(products);
 drawTrendLine(doc, monthlyData, pageWidth);
@@ -481,7 +431,6 @@ function drawEnhancedProductsTable(doc, products, pageWidth, reportType) {
 doc.addPage();
 drawSectionHeader(doc, 'DETAILED PRODUCT LISTING', pageWidth);
 
-// Filter products based on report type
 let filteredProducts = products;
 if (reportType === 'critical') {
   filteredProducts = products.filter(p => {
@@ -490,7 +439,6 @@ if (reportType === 'critical') {
   });
 }
 
-// Enhanced table with better styling
 const headers = ['#', 'Product Name', 'Category', 'Barcode', 'Expiry Date', 'Status', 'Risk Level'];
 const colWidths = [35, 140, 85, 75, 80, 70, 65];
 const tableWidth = colWidths.reduce((sum, width) => sum + width, 0);
@@ -508,25 +456,21 @@ const recommendations = generateRecommendations(products);
 recommendations.forEach((rec, index) => {
   const y = doc.y;
   
-  // Priority badge
   const priorityColor = getPriorityColor(rec.priority);
   doc.circle(50, y + 15, 6)
      .fillColor(priorityColor)
      .fill();
   
-  // Recommendation box
   doc.roundedRect(65, y, pageWidth - 25, rec.height || 50, 5)
      .fillColor('#f8fafc')
      .fill()
      .stroke('#e2e8f0');
   
-  // Title
   doc.fontSize(12)
      .fillColor('#1e293b')
      .font('Helvetica-Bold')
      .text(`${rec.icon} ${rec.title}`, 75, y + 10);
   
-  // Description
   doc.fontSize(10)
      .font('Helvetica')
      .fillColor('#64748b')
@@ -534,13 +478,6 @@ recommendations.forEach((rec, index) => {
   
   doc.y = y + (rec.height || 50) + 10;
 });
-}
-
-// Enhanced helper functions
-
-function interpolateColor(color1, color2, factor) {
-// Simple color interpolation (you might want to use a more sophisticated method)
-return color1; // Simplified for this example
 }
 
 function buildFilterSummary(filters) {
@@ -657,12 +594,10 @@ doc.rect(40, y, pageWidth, 35)
    .fillColor(COLORS.gray.primary)
    .fill();
 
-// Left accent bar
 doc.rect(40, y, 5, 35)
    .fillColor(COLORS.blue.light)
    .fill();
 
-// Title with icon
 doc.fontSize(16)
    .fillColor('#ffffff')
    .font('Helvetica-Bold')
@@ -672,7 +607,6 @@ doc.y = y + 45;
 }
 
 function drawGradientBox(doc, x, y, width, height, color1, color2) {
-// Simplified gradient effect
 for (let i = 0; i < height; i++) {
   const factor = i / height;
   doc.rect(x, y + i, width, 1)
@@ -682,11 +616,11 @@ for (let i = 0; i < height; i++) {
 }
 
 function drawEnhancedSummaryBoxes(doc, stats, pageWidth) {
-const boxWidth = (pageWidth - 75) / 4; // Increased spacing between boxes
+const boxWidth = (pageWidth - 75) / 4;
 const boxHeight = 90;
 const startX = 40;
 const y = doc.y + 10;
-const boxSpacing = 15; // Consistent spacing between boxes
+const boxSpacing = 15;
 
 const boxes = [
   { 
@@ -718,17 +652,14 @@ const boxes = [
 boxes.forEach((box, index) => {
   const x = startX + (index * (boxWidth + boxSpacing));
   
-  // Enhanced shadow
   doc.roundedRect(x + 2, y + 2, boxWidth, boxHeight, 8)
      .fillColor('#000000', 0.3)
      .fill();
   
-  // Box with darker background
   doc.roundedRect(x, y, boxWidth, boxHeight, 8)
      .fillColor(box.color)
      .fill();
   
-  // Content with proper spacing
   doc.fontSize(14)
      .fillColor('#ffffff')
      .font('Helvetica-Bold')
@@ -757,7 +688,6 @@ const chartData = [
 ].filter(item => item.value > 0);
 
 if (chartData.length > 0) {
-  // Add a clean white background panel
   const panelY = doc.y;
   doc.rect(30, panelY, pageWidth + 40, 250)
      .fillColor('#ffffff')
@@ -766,7 +696,6 @@ if (chartData.length > 0) {
      .lineWidth(1)
      .stroke();
   
-  // Section title with accent
   doc.rect(30, panelY, 4, 30)
      .fillColor('#2563eb')
      .fill();
@@ -776,7 +705,6 @@ if (chartData.length > 0) {
      .fillColor('#1e293b')
      .text('Status Distribution', 45, panelY + 8);
   
-  // Enhanced pie chart with solid colors
   drawEnhancedPieChart(doc, chartData, 200, panelY + 120, 80);
   drawEnhancedChartLegend(doc, chartData, 350, panelY + 60);
 }
@@ -797,7 +725,7 @@ const chartData = Object.entries(categoryCount)
     percentage: ((value/products.length)*100).toFixed(1)
   }))
   .sort((a, b) => b.value - a.value)
-  .slice(0, 10); // Top 10 categories
+  .slice(0, 10);
 
 if (chartData.length > 0) {
   drawHorizontalBarChart(doc, chartData, 50, doc.y, pageWidth - 100, 200);
@@ -818,7 +746,6 @@ function assessRisks(products) {
 const risks = [];
 const stats = calculateAdvancedStats(products);
 
-// Critical risks
 if (stats.expired > 0) {
   risks.push({
     level: 'high',
@@ -827,7 +754,6 @@ if (stats.expired > 0) {
   });
 }
 
-// High risk - Expiring soon
 if (stats.expiringSoon > stats.total * 0.2) {
   risks.push({
     level: 'high',
@@ -836,7 +762,6 @@ if (stats.expiringSoon > stats.total * 0.2) {
   });
 }
 
-// Medium risk - Inventory balance
 if (stats.expiringSoon > stats.total * 0.1) {
   risks.push({
     level: 'medium',
@@ -845,7 +770,6 @@ if (stats.expiringSoon > stats.total * 0.1) {
   });
 }
 
-// Low risk - General monitoring
 if (risks.length === 0) {
   risks.push({
     level: 'low',
@@ -961,7 +885,6 @@ for (let i = 0; i < range.count; i++) {
        .lineWidth(1)
        .stroke();
     
-    // Footer text with better contrast
     const footerText = `ExpireTracker Pro © ${new Date().getFullYear()} | Confidential Report | Generated: ${new Date().toLocaleString()}`;
     doc.fontSize(8)
        .fillColor('#1e293b')
@@ -973,7 +896,6 @@ for (let i = 0; i < range.count; i++) {
 }
 }
 
-// Placeholder implementations for complex chart functions
 function drawEnhancedPieChart(doc, data, centerX, centerY, radius) {
 const total = data.reduce((sum, item) => sum + item.value, 0);
 
@@ -989,17 +911,14 @@ if (total === 0) {
   return;
 }
 
-let currentAngle = -90; // Start from top
+let currentAngle = -90;
 
-// Draw solid pie slices with strong colors
 data.forEach((item, index) => {
   if (item.value > 0) {
     const sliceAngle = (item.value / total) * 360;
     
-    // Draw slice with enhanced styling
     doc.save();
     
-    // Strong shadow
     const shadowOffset = 3;
     doc.moveTo(centerX + shadowOffset, centerY + shadowOffset);
     doc.arc(centerX + shadowOffset, centerY + shadowOffset, radius, 
@@ -1009,7 +928,6 @@ data.forEach((item, index) => {
     doc.fillColor('#000000', 0.3);
     doc.fill();
     
-    // Main slice with solid color
     doc.moveTo(centerX, centerY);
     doc.arc(centerX, centerY, radius, 
             currentAngle * Math.PI / 180, 
@@ -1022,7 +940,6 @@ data.forEach((item, index) => {
   }
 });
 
-// White center circle with border
 doc.circle(centerX, centerY, radius * 0.4)
    .fillColor('#ffffff')
    .fill()
@@ -1030,7 +947,6 @@ doc.circle(centerX, centerY, radius * 0.4)
    .lineWidth(1.5)
    .stroke();
 
-// Center text with strong contrast
 doc.fontSize(16)
    .fillColor(COLORS.gray.secondary)
    .font('Helvetica-Bold')
@@ -1043,14 +959,13 @@ doc.fontSize(10)
 }
 
 function drawEnhancedChartLegend(doc, data, x, y) {
-const legendSpacing = 35; // Consistent spacing between legend items
+const legendSpacing = 35;
 const legendWidth = 150;
 const legendHeight = 30;
 
 data.forEach((item, index) => {
   const legendY = y + (index * legendSpacing);
   
-  // Background for legend item
   doc.roundedRect(x - 5, legendY - 5, legendWidth, legendHeight, 4)
      .fillColor('#ffffff')
      .fill()
@@ -1058,7 +973,6 @@ data.forEach((item, index) => {
      .lineWidth(0.5)
      .stroke();
   
-  // Color box with border
   doc.rect(x, legendY, 20, 20)
      .fillColor(item.color)
      .fill()
@@ -1066,13 +980,11 @@ data.forEach((item, index) => {
      .lineWidth(1)
      .stroke();
   
-  // Label with proper spacing
   doc.fontSize(11)
      .font('Helvetica-Bold')
      .fillColor(COLORS.gray.secondary)
      .text(item.label, x + 30, legendY + 2, { width: legendWidth - 40 });
   
-  // Value with proper spacing
   doc.fontSize(10)
      .font('Helvetica')
      .fillColor(COLORS.gray.primary)
@@ -1083,11 +995,10 @@ data.forEach((item, index) => {
 
 function drawHorizontalBarChart(doc, data, x, y, width, height) {
 const maxValue = Math.max(...data.map(item => item.value));
-const barHeight = Math.min(25, (height - 20) / data.length - 10); // Limit bar height
-const maxBarWidth = width - 180; // More space for labels
+const barHeight = Math.min(25, (height - 20) / data.length - 10);
+const maxBarWidth = width - 180;
 const labelWidth = 120;
 
-// Draw chart background
 doc.roundedRect(x, y - 10, width, height + 20, 5)
    .fillColor('#ffffff')
    .fill()
@@ -1097,9 +1008,8 @@ doc.roundedRect(x, y - 10, width, height + 20, 5)
 
 data.forEach((item, index) => {
   const barY = y + (index * (barHeight + 10));
-  const barWidth = Math.max(2, (item.value / maxValue) * maxBarWidth); // Minimum bar width
+  const barWidth = Math.max(2, (item.value / maxValue) * maxBarWidth);
   
-  // Label background
   doc.roundedRect(x, barY, labelWidth, barHeight, 3)
      .fillColor('#ffffff')
      .fill()
@@ -1107,19 +1017,16 @@ data.forEach((item, index) => {
      .lineWidth(0.5)
      .stroke();
   
-  // Label with ellipsis if needed
   doc.fontSize(11)
      .fillColor(COLORS.gray.secondary)
      .font('Helvetica-Bold')
      .text(item.label, x + 5, barY + (barHeight / 2) - 5, 
            { width: labelWidth - 10, ellipsis: true });
   
-  // Bar background
   doc.roundedRect(x + labelWidth + 10, barY, maxBarWidth, barHeight, 3)
      .fillColor(COLORS.gray.light)
      .fill();
   
-  // Data bar
   doc.roundedRect(x + labelWidth + 10, barY, barWidth, barHeight, 3)
      .fillColor(item.color)
      .fill()
@@ -1127,8 +1034,7 @@ data.forEach((item, index) => {
      .lineWidth(0.5)
      .stroke();
   
-  // Value and percentage with proper spacing
-  if (barWidth > 30) { // Only show value if bar is wide enough
+  if (barWidth > 30) {
     doc.fontSize(10)
        .fillColor('#ffffff')
        .font('Helvetica-Bold')
@@ -1138,7 +1044,6 @@ data.forEach((item, index) => {
              { width: barWidth - 10 });
   }
   
-  // Percentage always shown at the end
   doc.fontSize(10)
      .fillColor(COLORS.gray.secondary)
      .text(`${item.percentage}%`,
@@ -1155,13 +1060,11 @@ const chartWidth = pageWidth - 80;
 const chartX = 40;
 let chartY = doc.y + 20;
 
-// Check if we need a new page
 if (chartY + chartHeight + 60 > doc.page.height - 100) {
   doc.addPage();
   chartY = 50;
 }
 
-// Chart container with white background
 doc.roundedRect(chartX, chartY, chartWidth, chartHeight, 8)
    .fillColor('#ffffff')
    .fill()
@@ -1169,7 +1072,6 @@ doc.roundedRect(chartX, chartY, chartWidth, chartHeight, 8)
    .lineWidth(1)
    .stroke();
 
-// Calculate timeline data
 const timelineData = calculateExpiryTimeline(products);
 
 if (timelineData.length === 0) {
@@ -1182,7 +1084,6 @@ if (timelineData.length === 0) {
   return;
 }
 
-// Draw grid lines
 const gridLines = 5;
 for (let i = 0; i < gridLines; i++) {
   const y = chartY + 20 + (i * ((chartHeight - 40) / (gridLines - 1)));

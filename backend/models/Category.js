@@ -6,4 +6,10 @@ const Category = sequelize.define('Category', {
   name: { type: DataTypes.STRING, allowNull: false, unique: true },
 }, { timestamps: true });
 
+const Product = require('./Product');
+Category.hasMany(Product, { 
+  foreignKey: 'categoryId',
+  onDelete: 'CASCADE'
+});
+
 module.exports = Category;

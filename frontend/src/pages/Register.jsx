@@ -57,12 +57,9 @@ const Register = () => {
           navigate('/dashboard');
         }, 100);
       } else {
-        console.log(result);
         toast.error(result.error || 'Registration failed. Please try again.');
       }
     } catch (error) {
-      console.log(error);
-      // Show specific error message from the response if available
       const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Registration failed. Please try again.';
       toast.error(errorMessage);
     }

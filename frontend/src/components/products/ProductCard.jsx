@@ -28,7 +28,6 @@ const statusColors = {
 };
 
 const ProductCard = ({ product, onEdit, onDelete }) => {
-  console.log(!!onEdit, !!onDelete);
 
   return (
     <div className="bg-white rounded shadow p-4 flex flex-col gap-2">

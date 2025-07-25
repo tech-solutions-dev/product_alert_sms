@@ -1,9 +1,7 @@
-// Product Controller for robust expiry status filtering and management
 const { Product, Category } = require("../models");
 const { Op } = require("sequelize");
 const { getProductStatus } = require("../config/utils");
 
-// GET /api/products?status=Expired|Expiring Soon|Fresh
 exports.getAllProducts = async (req, res) => {
   try {
     const { name, categoryId, status } = req.query;
@@ -14,11 +12,9 @@ exports.getAllProducts = async (req, res) => {
     if (categoryId) {
       where.categoryId = categoryId;
     }
-    // Filter by status using expiryDate
     if (status) {
       where.status = status;
     }
-    // Restrict to user's categories if not admin
     if (req.user.role !== 'admin') {
       where.categoryId = req.user.categoryIds;
     }
@@ -29,14 +25,12 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
-// GET /api/products/:id
 exports.getProductById = async (req, res) => {
   try {
     const product = await Product.findByPk(req.params.id, { include: Category });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    // Restrict to user's categories if not admin
     if (req.user.role !== 'admin' && !req.user.categoryIds.includes(product.categoryId)) {
       return res.status(403).json({ message: "Forbidden: You do not have access to this product" });
     }
@@ -46,14 +40,12 @@ exports.getProductById = async (req, res) => {
   }
 };
 
-// POST /api/products
 exports.createProduct = async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Forbidden: Only admins can add products' });
   }
   try {
     const { name, barcode, expiryDate, categoryId, description, imageUrl } = req.body;
-    // status is set by model hooks
     const product = await Product.create({
       name,
       barcode,
@@ -68,7 +60,6 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-// PUT /api/products/:id
 exports.updateProduct = async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Forbidden: Only admins can update products' });
@@ -78,9 +69,7 @@ exports.updateProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    // Update product fields
     await product.update(req.body);
-    // Force status update after expiryDate change
     if (req.body.expiryDate) {
       product.status = getProductStatus(product.expiryDate);
       await product.save();

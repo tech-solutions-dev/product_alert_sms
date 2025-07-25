@@ -67,7 +67,6 @@ const ProductModal = ({ open, onClose, product, onSuccess }) => {
     }
   };
 
-  // Manual barcode input
   const handleManualBarcodeChange = (e) => {
     const value = e.target.value;
     setScannedBarcode(value);
@@ -78,7 +77,6 @@ const ProductModal = ({ open, onClose, product, onSuccess }) => {
 
   return (
     <>
-      {/* Main Modal (Edit Only) */}
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
         <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4 relative">
           <button
@@ -92,7 +90,6 @@ const ProductModal = ({ open, onClose, product, onSuccess }) => {
           <h2 className="text-xl font-bold text-gray-800 mb-4">Edit Product</h2>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Name Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
               <input
@@ -103,7 +100,6 @@ const ProductModal = ({ open, onClose, product, onSuccess }) => {
               {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
             </div>
 
-            {/* Category Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
               <select
@@ -118,7 +114,6 @@ const ProductModal = ({ open, onClose, product, onSuccess }) => {
               {errors.categoryId && <p className="mt-1 text-sm text-red-600">{errors.categoryId.message}</p>}
             </div>
 
-            {/* Expiry Date Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
               <input
@@ -129,7 +124,6 @@ const ProductModal = ({ open, onClose, product, onSuccess }) => {
               {errors.expiryDate && <p className="mt-1 text-sm text-red-600">{errors.expiryDate.message}</p>}
             </div>
 
-            {/* Barcode Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Barcode</label>
               <input
@@ -144,7 +138,6 @@ const ProductModal = ({ open, onClose, product, onSuccess }) => {
               {errors.barcode && <p className="mt-1 text-sm text-red-600">{errors.barcode.message}</p>}
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}

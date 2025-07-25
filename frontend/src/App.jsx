@@ -5,7 +5,6 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Layout from './components/common/Layout';
 
-// Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AddProductPage from './pages/AddProduct';
@@ -29,7 +28,6 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public routes */}
         <Route 
           path="/login" 
           element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />} 

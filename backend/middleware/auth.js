@@ -12,7 +12,6 @@ exports.auth = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, jwtSecret);
     req.user = decoded;
-    // If not admin, fetch categoryIds
     if (req.user.role !== 'admin') {
       const userCategories = await UserCategory.findAll({ where: { userId: req.user.id } });
       req.user.categoryIds = userCategories.map(uc => uc.categoryId);

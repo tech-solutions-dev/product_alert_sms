@@ -24,7 +24,6 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle errors
 api.interceptors.response.use(
   (response) => {
     return response;
@@ -33,11 +32,8 @@ api.interceptors.response.use(
     const message = error.response?.data?.error || 'An error occurred';
     const isAuthRoute = error.config.url.includes('/auth/login') || error.config.url.includes('/auth/register');
     
-    // Don't show toast messages for auth routes (login/register)
     if (!isAuthRoute) {
-      // Handle specific error cases
       if (error.response?.status === 401) {
-        // Only handle session expiry for non-auth routes
         localStorage.removeItem('token');
         window.location.href = '/login';
         toast.error('Session expired. Please login again.');

@@ -6,7 +6,6 @@ import { useAuthContext } from '../../context/AuthContext';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const { user, logout } = useAuthContext();
-  // Define nav items based on role
   const navItems = [
     { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard size={22} className="text-indigo-600" /> },
     { name: 'Products', href: '/products', icon: <Package size={22} className="text-blue-600" /> },
@@ -20,13 +19,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
   return (
     <>
-      {/* Overlay for mobile */}
       <div
         className={`fixed inset-0 z-20 bg-black/40 backdrop-blur-sm transition-opacity duration-300 md:hidden ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={toggleSidebar}
         aria-hidden="true"
       />
-      {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 h-full w-64 z-30 bg-white/80 shadow-2xl backdrop-blur-2xl border-r border-slate-100 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 flex flex-col`}
         role="navigation"

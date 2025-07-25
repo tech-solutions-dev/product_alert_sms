@@ -18,7 +18,6 @@ exports.getCategoryById = async (req, res) => {
   try {
     const category = await Category.findByPk(req.params.id);
     if (!category) return res.status(404).json({ message: 'Category not found' });
-    // Restrict to user's categories if not admin
     if (req.user.role !== 'admin' && !req.user.categoryIds.includes(category.id)) {
       return res.status(403).json({ message: 'Forbidden: You do not have access to this category' });
     }
